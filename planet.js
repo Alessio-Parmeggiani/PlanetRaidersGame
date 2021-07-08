@@ -112,12 +112,6 @@ function uniformlyDistribute(mesh,ground,density=0.5,collisions=false,scene){
             //point on surface of sphere
             var position=randomPos(planetDiameter/2)
             obj.position = position
-
-            //stick(obj,scene)
-
-            //var d= position.subtract(new BABYLON.Vector3(0,0,0))
-            //obj.lookAt(d)
-            //obj.rotate(new BABYLON.Vector3(1, 0 ,0), Math.PI/2);
             orientSurface(obj,position,ground)
 
             obj.parent = ground;
@@ -140,12 +134,17 @@ function createBullet(mesh,count,shooter,ground,mode="parallel",scene) {
     
     const currentTime = new Date().getTime();
 
+    //get width of bullet
+    bulletHorizOffset==mesh.getBoundingInfo().boundingBox.extendSize.x;
+
     var dir;
+    
     if(mode=="arc") dir=shooter.rotation.z - ((bulletCount-1)/2 * bulletAngleOffset)
     else if(mode=="parallel") {
         dir=shooter.rotation.z
         var horizPosition=-(bulletCount-1)/2 * bulletHorizOffset
     }
+
     projectiles=[]
     for(var i=0;i<count;i++){
         
@@ -168,9 +167,6 @@ function createBullet(mesh,count,shooter,ground,mode="parallel",scene) {
 
         bullet.setParent(pivot)
         pivot.setParent(ground)
-  
-
-
 
         projectile["axis"] = new BABYLON.Vector3(dir, 0, 0)
         projectile["direction"] = dir > 0 ? 1 : -1
@@ -236,6 +232,9 @@ function createEnemy(mesh,position) {
     return enemyDict 
 }
 
+//
+//---------------CREATE SCENE-----------
+//
 
 var createScene = function () {
 
@@ -249,10 +248,8 @@ var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, 1.2, 10, new BABY
 //mainly for debug, control rotation of camera with mouse
 camera.attachControl()
 
-
 var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 light.intensity = 0.7;
-
 
 //Creating the (temporary) player
 player = BABYLON.MeshBuilder.CreateBox("player", { size: 1, width: playerWidth,segments: 32 }, scene);
@@ -283,9 +280,9 @@ player.position.z = -planetDiameter / 2;
 
 //some debug utilities
 if(DEBUG) {
-    ground.showBoundingBox = true
-    ground.visibility = 0.1
-    player.visibility = 0.5
+    //ground.showBoundingBox = true
+    ground.visibility = 0.3
+    player.visibility = 0.8
 }
 
 //------------LOAD ASSETS--------------
@@ -303,7 +300,7 @@ assetsPath.forEach(asset => {
     
     
     meshTask.onSuccess = (task) => {
-        // disable the original mesh and store it in the Atlas
+        // disable the original mesh and store it in the data structure
         console.log('loaded and stored '+asset)
         task.loadedMeshes[0].setEnabled(false)
         assets.assetMeshes.set(asset, task.loadedMeshes[0])
@@ -318,40 +315,20 @@ assetsPath.forEach(asset => {
 assetsManager.load();
 console.log("loading has ended")
 
-/*
-//alternative laoding, not used
-assetsManager.onTaskSuccessObservable.add(function(task) {
-    // disable the original mesh and store it in the Atlas
-    console.log('loaded and stored '+asset)
-    task.loadedMeshes[0].setEnabled(false)
-    assets.assetMeshes.set(asset, task.loadedMeshes[0])
-    
-})
 
-
-assetsManager.load();
-console.log("loading has ended")
-assetsManager.onTasksDoneObservable.add(function(tasks) {
-    //var errors = tasks.filter(function(task) {return task.taskState === BABYLON.AssetTaskState.ERROR});
-    //var successes = tasks.filter(function(task) {return task.taskState !== BABYLON.AssetTaskState.ERROR});
-
-
-    console.log("all task done")
-   
-});
-*/
 
 //---------POPULATE PLANET---------------
-//var mesh=BABYLON.MeshBuilder.CreateCylinder("Rocks", {size: 0.2 }, scene);
-
+var mesh=BABYLON.MeshBuilder.CreateSphere("Rocks", {diameter: 0.2 }, scene);
+mesh.setEnabled(false)
 //var mesh=assets.assetMeshes.get("rocketTest.babylon")
-//uniformlyDistribute(mesh,ground,density=0.1,collisions=true,scene)
+uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene)
 
 //CREATE ENEMIES
 
-var mesh=BABYLON.MeshBuilder.CreateCylinder("Rocks", {size: 0.2 }, scene);
-mesh.visibility=0.5
+var mesh=BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
+//mesh.visibility=0.5
 mesh.setEnabled(false)
+
 //enemies
 var numEnemies=0
 for(var i=0;i<numEnemies;i++) {
@@ -428,7 +405,7 @@ if (inputMap["h"] && currentTime > nextBulletTime) {
 })
 //END OnBeforeRenderObservable i.e. input reading//
 
-//Create enemy
+
 
 
 //compute bullet position and collision
@@ -472,14 +449,14 @@ for (var idx = 0; idx < bullets.length; idx++) {
 
 });
 
-console.log("piero")
 
 
 
 
 
 
-/*
+
+
 //ENEMY ALTERNATE MOVEMENT SNIPPET
 var moved=0
 var nextEnemyMoveTime=new Date().getTime();
@@ -505,7 +482,7 @@ scene.registerBeforeRender(function () {
         }
     }
 })
-*/
+
 
 
 
@@ -534,41 +511,6 @@ window.initFunction = async function() {
 };
 
 initFunction().then(() => {
-
-    //trying to render scene only when all assets are loaded
-    /*
-    console.log("Loading assets...")
-    var assetsManager = new BABYLON.AssetsManager(scene);
-    assetsPath.forEach(asset => {
-        
-        const name='load '+asset
-        const path='./'
-        const meshTask = assetsManager.addMeshTask(name, "", path, asset)
-        console.log("loading : "+ asset)
-        meshTask.onSuccess = (task) => {
-            // disable the original mesh and store it in the Atlas
-            console.log('loaded and stored '+asset)
-            task.loadedMeshes[0].setEnabled(false)
-            assets.assetMeshes.set(asset, task.loadedMeshes[0])
-            
-        }
-        meshTask.onError = function (task, message, exception) {
-            console.log(message, exception);
-        }
-        
-    })
-    //do all tasks
-    assetsManager.load();
-    console.log("loading has ended")
-
-    //when tasks done, render scene
-    assetsManager.onFinish = function(tasks) {
-        engine.runRenderLoop(function() {
-            scene.render();
-        });
-    };
-    */
-    
     //before..
     console.log("render")
     sceneToRender = scene        

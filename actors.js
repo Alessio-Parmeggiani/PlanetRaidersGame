@@ -36,6 +36,8 @@ class Enemy{
     }
 
     moveStep(){
+        //move of some distance and wait MoveInterval
+        //if moveInterval is set to 0, the movement is continous
         const currentTime = new Date().getTime();
 
         var forward = new BABYLON.Vector3(0, 0, 1);		
@@ -48,7 +50,7 @@ class Enemy{
             distanceMoved+=this.velocity
         }
         else if(distanceMoved>0){
-            this.nextEnemyMoveTime = new Date().getTime() + this.MoveInterval;
+            this.nextEnemyMoveTime = new Date().getTime() + this.moveInterval;
             distanceMoved=0
         }
     }
