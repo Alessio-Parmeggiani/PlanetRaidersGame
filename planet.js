@@ -30,13 +30,13 @@ var attackSpeed = 300
 var rotationSpeed = Math.PI / 150
 
 
-var bulletRange = 15000
-var bulletSpeed = Math.PI / 100
-bulletSpeed/=3
-var bulletHeight=1
-var bulletCount=1
-var bulletAngleOffset= pi/12;
-var bulletHorizOffset=0.5;
+var bulletRange = 15000;
+var bulletSpeed = Math.PI / 100;
+bulletSpeed /= 3;
+var bulletHeight = 1;
+var bulletCount = 1;
+var bulletAngleOffset = pi/12;
+var bulletHorizOffset = 0.5;
 
 
 //other stats
@@ -130,6 +130,7 @@ function uniformlyDistribute(mesh,ground,density=0.5,collisions=false,scene){
 
 
 //create a bullet
+// count = number of projectiles
 function createBullet(mesh,count,shooter,ground,mode="parallel",scene) {
     
     const currentTime = new Date().getTime();
@@ -152,8 +153,8 @@ function createBullet(mesh,count,shooter,ground,mode="parallel",scene) {
         
         //var bullet = BABYLON.Mesh.CreateSphere(`${currentTime}bullet${i}`, 16, .5, scene);
         var pivot;
-        if(DEBUG) pivot = BABYLON.Mesh.CreateCapsule(`${currentTime}pivot${i}`, { radiusTop: 0.05 }, scene);
-        else pivot=new BABYLON.TransformNode(`${currentTime}pivot${i}`)
+        if(DEBUG) pivot = BABYLON.Mesh.CreateCapsule(`${currentTime}pivot${i}`, { radiusTop: 0.05 }, scene); // capsule is visible for debug
+        else pivot=new BABYLON.TransformNode(`${currentTime}pivot${i}`) // transformNode is invisible
         //get instance from pre-loaded model
         var bullet=mesh.createInstance()
         bullet.scaling=new BABYLON.Vector3(0.15,0.15,0.15)
@@ -162,6 +163,7 @@ function createBullet(mesh,count,shooter,ground,mode="parallel",scene) {
         bullet.position = shooterPos
 
         //bullet.rotation.y=90
+        // dir is the direction of the cannon basically
         bullet.rotation.z= dir
         pivot.rotation.z = dir
 
@@ -312,7 +314,7 @@ assetsPath.forEach(asset => {
     
     
 })
-assetsManager.load();
+assetsManager.load();   // do all the tasks
 console.log("loading has ended")
 
 
@@ -330,7 +332,7 @@ var mesh=BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
 mesh.setEnabled(false)
 
 //enemies
-var numEnemies=0
+var numEnemies=1
 for(var i=0;i<numEnemies;i++) {
     var position=randomPos(planetRadius)
     var enemy=createEnemy(mesh,position)
@@ -355,6 +357,7 @@ inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
 
 
 let nextBulletTime = new Date().getTime();
+// do the following every time before rendering a frame
 scene.onBeforeRenderObservable.add(() => {
 if (inputMap["w"] || inputMap["ArrowUp"]) {
     wheelR.rotation.x+=0.05
@@ -363,8 +366,8 @@ if (inputMap["w"] || inputMap["ArrowUp"]) {
     var dir = player.getDirection(forward);
     dir.normalize();
     
-    if(PLAYERMOVE) playerPivot.rotate(dir, Math.PI / 150, BABYLON.Space.WORLD)
-    else ground.rotate(dir, -Math.PI / 150, BABYLON.Space.WORLD);
+    if(PLAYERMOVE) playerPivot.rotate(dir, Math.PI / 150, BABYLON.Space.WORLD)  // the player moves, the planet stays still
+    else ground.rotate(dir, -Math.PI / 150, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
     
 }
 if (inputMap["a"] || inputMap["ArrowLeft"]) {
@@ -399,6 +402,7 @@ if (inputMap["h"] && currentTime > nextBulletTime) {
     if (player.rotation.z == 0) player.rotation.z += 0.001
     var mesh=assets.assetMeshes.get("rocketTest.babylon")
     var projectiles=createBullet(mesh,bulletCount,player,ground,mode="arc",scene)
+    // bullets is all existing bullets, projectiles is the bullets fired at once
     for(var pr=0; pr<projectiles.length;pr++) bullets.push(projectiles[pr])
     nextBulletTime = new Date().getTime() + attackSpeed;
 }
@@ -429,9 +433,9 @@ for (var idx = 0; idx < bullets.length; idx++) {
     //collision with ground
     if (bulletFall) {
         bullet.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
-        bullet.dispose()
+        bullet.dispose()    // delete from scene
         pivot.dispose()
-        bullets.splice(idx,1)
+        bullets.splice(idx,1)   // delete from array
         
     }
     //collision with objects
