@@ -1,5 +1,5 @@
 class Enemy{
-    constructor(mesh,planet,target){
+    constructor(mesh,planet,target,DEBUG=true,scene){
         this.mesh=mesh
 
         this.enemy=null
@@ -17,10 +17,10 @@ class Enemy{
         this.maxdistanceMoved=Math.PI/4
 
         //how much to move per frame
-        this.velocity=Math.PI/200
+        this.velocity=Math.PI/800
 
         //how much to wait before moving again, if 0 continue movement
-        this.moveInterval=1000 //ms
+        this.moveInterval=2000 //ms
 
         //distance traveled in this step
         this.distanceStepMoved=0
@@ -32,7 +32,8 @@ class Enemy{
 
         this.enemy=this.mesh.createInstance()
         this.enemy.position=position
-        this.enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
+        if(DEBUG) this.enemyPivot = BABYLON.Mesh.CreateCapsule(`enemyPivot`, { radiusTop: 0.05 }, scene);
+        else this.enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
 
         //rotate pivot towards player w.r.t enemy position
         rotateTowards(this.enemyPivot,this.enemy,this.target)
@@ -64,7 +65,17 @@ class Enemy{
             //stop moving and wait
             this.nextEnemyMoveTime = new Date().getTime() + this.moveInterval;
             this.distanceStepMoved=0
+            /*
+            this.enemy.setParent(null)
+            //da fare aniamto magari
+            rotateTowards(this.enemyPivot,this.enemy,this.target)
+            this.enemy.setParent(this.enemyPivot)
+            */
         }
+    }
+
+    updateTarget(target){
+        this.target=target
     }
 
 }

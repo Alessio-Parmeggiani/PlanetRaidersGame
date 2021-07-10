@@ -47,9 +47,14 @@ const assets = {
     assetMeshes : new Map(),
 }
 
+//assets needed later
 const assetsPath = [
-
     "rocketTest.babylon",
+]
+
+//assets to be used immediately
+const immAssetsPath = [
+    "grass.babylon",
 ]
 
 //data
@@ -94,7 +99,7 @@ function orientSurface(object,position,ground) {
     //half of height
     var objHeight = object.getBoundingInfo().boundingBox.extendSize;
     
-    object.position = ground.position.add(directionPoint.scale(planetRadius + objHeight.y ));
+    object.position = ground.position.add(directionPoint.scale(planetRadius));
    
     BABYLON.Vector3.RotationFromAxisToRef(xaxis, yaxis, zaxis, object.rotation);
 }
@@ -204,32 +209,6 @@ function rotateTowards(obj,A,B){
     obj.rotate(new BABYLON.Vector3(1, 0 ,0), Math.PI/2);
 }
 
-//create enemy
-function createEnemy(mesh,position) {
-    const currentTime = new Date().getTime();
-
-    var enemyDict = {};
-    var enemy = mesh.createInstance();
-    enemy.position = position;
-    enemy.visibility = 0.4;
-    var enemyDir = player.position.subtract(enemy.position);
-    var enemyPivot;
-    if (DEBUG) enemyPivot = BABYLON.Mesh.CreateCapsule(`enemyPivot`, { radiusTop: 0.05 }, scene);
-    else enemyPivot = new BABYLON.TransformNode(`${currentTime}enemyPivot`);
-    //var enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
-    
-    rotateTowards(enemyPivot,enemy,player);
-
-    orientSurface(enemy,position,ground);
-
-    enemy.setParent(enemyPivot);
-    enemyPivot.setParent(ground);
-
-    enemyDict["enemy"] = enemy;
-    enemyDict["pivot"] = enemyPivot;
-
-    return enemyDict;
-}
 
 //
 //---------------CREATE SCENE-----------
@@ -313,6 +292,29 @@ assetsPath.forEach(asset => {
     }
 });
 
+
+immAssetsPath.forEach(asset => {
+    
+    const name='load '+asset;
+    const path='./';
+    const meshTask = assetsManager.addMeshTask(name, "", path, asset);
+    console.log("loading : "+ asset);
+    
+    
+    meshTask.onSuccess = (task) => {
+        // disable the original mesh and store it in the data structure
+        console.log('loaded and stored '+asset);
+        task.loadedMeshes[0].setEnabled(false);
+        //assets.assetMeshes.set(asset, task.loadedMeshes[0]);
+        uniformlyDistribute(task.loadedMeshes[0], 
+            ground, density=0.5, collisions=true, scene);
+        
+    }
+    meshTask.onError = function (task, message, exception) {
+        console.log(message, exception);
+    }
+});
+/*
 // Loading assets that appear immediately
 const grassMeshTask = assetsManager.addMeshTask("grass task", "",
      "./", "grass.babylon");
@@ -322,7 +324,7 @@ grassMeshTask.onSuccess = (task) => {
     uniformlyDistribute(task.loadedMeshes[0], 
         ground, density=0.5, collisions=true, scene);
 }
-
+*/
 assetsManager.onFinish = function(tasks) {
     console.log("finish")       
     engine.runRenderLoop(function () {
@@ -354,7 +356,7 @@ mesh.setEnabled(false);
 var numEnemies=1
 for(var i=0;i<numEnemies;i++) {
     var position=randomPos(planetRadius)
-    var enemy=new Enemy(mesh,ground,player)
+    var enemy=new Enemy(mesh,ground,player,DEBUG,scene)
     enemy.spawn(position)
     enemies.push(enemy)
 }
@@ -471,21 +473,17 @@ for (var idx = 0; idx < bullets.length; idx++) {
 scene.registerBeforeRender(function () {   
     for (var idx = 0; idx < enemies.length; idx++) {
         enemies[idx].moveStep()
-        
+        //enemies[idx].updateTarget(player)
     }
 })
-
-
-
-
-
-
 
 
 return scene;
 
 
 };
+//END OF SCENE CREATION
+
 
 //other things
 window.initFunction = async function() {               
