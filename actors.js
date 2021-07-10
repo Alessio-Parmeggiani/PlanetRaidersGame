@@ -6,20 +6,30 @@ class Enemy{
         this.pivot=null
 
         this.planet=planet
+
+        //move toward target
         this.target=target
 
         //movement
         this.nextEnemyMoveTime=new Date().getTime();
+
+        //distance to move before stopping
         this.maxdistanceMoved=Math.PI/4
+
+        //how much to move per frame
         this.velocity=Math.PI/200
-        this.moveInterval=300 //ms
+
+        //how much to wait before moving again, if 0 continue movement
+        this.moveInterval=1000 //ms
+
+        //distance traveled in this step
+        this.distanceStepMoved=0
     }
 
     spawn(position=new BABYLON.Vector3(0,0,0)){
-        //time for naming
+        //time used for naming
         const currentTime = new Date().getTime();
 
-        //serve il this ovunque?
         this.enemy=this.mesh.createInstance()
         this.enemy.position=position
         this.enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
@@ -40,19 +50,35 @@ class Enemy{
         //if moveInterval is set to 0, the movement is continous
         const currentTime = new Date().getTime();
 
+        //compute how to rotate pivot
         var forward = new BABYLON.Vector3(0, 0, 1);		
-        var direction = enemyPivot.getDirection(forward);
+        var direction = this.enemyPivot.getDirection(forward);
         direction.normalize();
-        var distanceMoved=0
-        
-        if (distanceMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime) {
+
+        if (this.distanceStepMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime) {
+            //move of velocity
             this.enemyPivot.rotate(direction,this.velocity, BABYLON.Space.WORLD);
-            distanceMoved+=this.velocity
+            this.distanceStepMoved+=this.velocity
         }
-        else if(distanceMoved>0){
+        else if(this.distanceStepMoved>0){
+            //stop moving and wait
             this.nextEnemyMoveTime = new Date().getTime() + this.moveInterval;
-            distanceMoved=0
+            this.distanceStepMoved=0
         }
     }
 
 }
+
+//serve la classe proiettile?
+/*
+class Bullet{
+    constructor(mesh,planet,target){
+        this.mesh=mesh
+
+        this.bullet=null
+        this.pivot=null
+
+        
+    }
+}
+*/

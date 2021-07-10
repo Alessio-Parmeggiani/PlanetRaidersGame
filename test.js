@@ -60,3 +60,33 @@ initFunction().then(() => {
     
 });
 */
+
+
+/*
+//create enemy
+function createEnemy(mesh,position) {
+    const currentTime = new Date().getTime();
+
+    var enemyDict = {}
+    var enemy=mesh.createInstance()
+    enemy.position=position
+    enemy.visibility=0.4
+    var enemyDir= player.position.subtract(enemy.position)
+    var enemyPivot;
+    if(DEBUG) enemyPivot = BABYLON.Mesh.CreateCapsule(`enemyPivot`, { radiusTop: 0.05 }, scene);
+    else enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
+    //var enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
+    
+    rotateTowards(enemyPivot,enemy,player)
+
+    orientSurface(enemy,position,ground)
+
+    enemy.setParent(enemyPivot)
+    enemyPivot.setParent(ground)
+
+    enemyDict["enemy"]=enemy
+    enemyDict["pivot"]=enemyPivot
+
+    return enemyDict 
+}
+*/

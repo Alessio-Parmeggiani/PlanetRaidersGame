@@ -318,6 +318,7 @@ const grassMeshTask = assetsManager.addMeshTask("grass task", "",
      "./", "grass.babylon");
 
 grassMeshTask.onSuccess = (task) => {
+    task.loadedMeshes[0].setEnabled(false);
     uniformlyDistribute(task.loadedMeshes[0], 
         ground, density=0.5, collisions=true, scene);
 }
@@ -334,10 +335,10 @@ console.log("loading has ended");
 
 
 //---------POPULATE PLANET---------------
-var mesh = BABYLON.MeshBuilder.CreateSphere("Rocks", {diameter: 0.2 }, scene);
-mesh.setEnabled(false);
+//var mesh = BABYLON.MeshBuilder.CreateSphere("Rocks", {diameter: 0.2 }, scene);
+//mesh.setEnabled(false);
 //var mesh=assets.assetMeshes.get("rocketTest.babylon")
-uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
+//uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
 
 // ---- ADDING GRASS ---- 
 //console.log(BABYLON.AssetTaskState);
@@ -345,23 +346,18 @@ uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
 //console.log(assets);
 //uniformlyDistribute(grass,ground,density=0.5,collisions=true,scene);
 
-//CREATE ENEMIES
 
+//CREATE ENEMIES
 var mesh = BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
 //mesh.visibility=0.5
 mesh.setEnabled(false);
-
-//enemies
-var numEnemies=1;
-for (var i=0;i<numEnemies;i++) {
-    var position=randomPos(planetRadius);
-    var enemy=createEnemy(mesh,position);
-    enemies.push(enemy);
+var numEnemies=1
+for(var i=0;i<numEnemies;i++) {
+    var position=randomPos(planetRadius)
+    var enemy=new Enemy(mesh,ground,player)
+    enemy.spawn(position)
+    enemies.push(enemy)
 }
-
-
-
-
 
 //------------INPUT READING--------------
 
@@ -470,29 +466,12 @@ for (var idx = 0; idx < bullets.length; idx++) {
 });
 
 
-//ENEMY ALTERNATE MOVEMENT SNIPPET
-var moved=0
-var nextEnemyMoveTime=new Date().getTime();
-scene.registerBeforeRender(function () {
-    const currentTime = new Date().getTime();
-    for (var idx = 0; idx < enemies.length; idx++) {
-        
-        var enemyPivot = enemies[idx]["pivot"];
-        var enemy = enemies[idx]["enemy"];
 
-        var forward = new BABYLON.Vector3(0, 0, 1);		
-        var direction = enemyPivot.getDirection(forward);
-        direction.normalize();
+//Move enemies
+scene.registerBeforeRender(function () {   
+    for (var idx = 0; idx < enemies.length; idx++) {
+        enemies[idx].moveStep()
         
-        
-        if (moved<pi/4 && currentTime>nextEnemyMoveTime) {
-            enemyPivot.rotate(direction,pi/200, BABYLON.Space.WORLD);
-            moved += pi/200;
-        }
-        else if(moved>0){
-            nextEnemyMoveTime = new Date().getTime() + 300;
-            moved = 0;
-        }
     }
 })
 
