@@ -68,7 +68,7 @@ var enemies = [];
 function randomPos(radius){
     var x = Math.random();
     x *= Math.round(Math.random()) ? 1 : -1;
-    var y = -Math.random();
+    var y = Math.random();
     y *= Math.round(Math.random()) ? 1 : -1;
     var z = Math.random();
     z *= Math.round(Math.random()) ? 1 : -1;
