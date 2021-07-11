@@ -9,6 +9,7 @@ class Enemy{
 
         //move toward target
         this.target=target
+        
 
         //movement
         this.nextEnemyMoveTime=new Date().getTime();
@@ -17,16 +18,19 @@ class Enemy{
         this.maxdistanceMoved=Math.PI/4
 
         //how much to move per frame
-        this.velocity=Math.PI/800
+        this.velocity=Math.PI/200
 
         //how much to wait before moving again, if 0 continue movement
-        this.moveInterval=2000 //ms
+        this.moveInterval=500 //ms
 
         //distance traveled in this step
         this.distanceStepMoved=0
+
+        this.direction=1
     }
 
     spawn(position=new BABYLON.Vector3(0,0,0)){
+        console.log("creating enemy at: "+position)
         //time used for naming
         const currentTime = new Date().getTime();
 
@@ -44,6 +48,21 @@ class Enemy{
         this.enemy.setParent(this.enemyPivot)
         this.enemyPivot.setParent(this.planet)
 
+        //this.direction=this.getMoveDirection()
+        if(position.x>0) this.direction=-1
+        //debug
+        /*
+        var rotation = new BABYLON.Quaternion.Identity()
+            
+        var R=this.enemyPivot.getWorldMatrix().decompose(BABYLON.Vector3.Zero(), rotation, new BABYLON.Vector3.Zero())
+        if (this.enemyPivot.rotationQuaternion) {
+            console.log(this.enemyPivot.rotationQuaternion.copyFrom(rotation).toEulerAngles())
+            } else {
+            rotation.toEulerAnglesToRef(this.enemyPivot.rotation)
+            }
+        */
+        
+
     }
 
     moveStep(){
@@ -56,30 +75,44 @@ class Enemy{
         var direction = this.enemyPivot.getDirection(forward);
         direction.normalize();
 
+        var dir=this.direction
+        
+        //var dir=1
         if (this.distanceStepMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime) {
             //move of velocity
-            this.enemyPivot.rotate(direction,this.velocity, BABYLON.Space.WORLD);
+            
+            
+            this.enemyPivot.rotate(direction,this.velocity*dir, BABYLON.Space.WORLD);
             this.distanceStepMoved+=this.velocity
         }
         else if(this.distanceStepMoved>0){
             //stop moving and wait
+            //console.log(dir)
             this.nextEnemyMoveTime = new Date().getTime() + this.moveInterval;
-            this.distanceStepMoved=0
-            /*
-            this.enemy.setParent(null)
-            //da fare aniamto magari
-            rotateTowards(this.enemyPivot,this.enemy,this.target)
-            this.enemy.setParent(this.enemyPivot)
-            */
+            this.distanceStepMoved=0    
         }
     }
 
-    updateTarget(target){
-        this.target=target
+    updatePosition(){
+        console.log("changing direction")
+        //every step it should update the direction
+        this.enemyPivot.setParent(null)
+        this.enemy.setParent(null)
+       
+        this.enemyPivot.rotation = BABYLON.Vector3.Zero()
+        //da fare animato magari
+        
+        rotateTowards(this.enemyPivot,this.enemy,this.target)
+
+        if(this.enemy.getAbsolutePosition().x>0) this.direction=-1
+        else this.direction=1
+
+        this.enemy.setParent(this.enemyPivot)
+        this.enemyPivot.setParent(this.planet)
     }
 
+    
 }
-
 //serve la classe proiettile?
 /*
 class Bullet{
