@@ -48,20 +48,7 @@ class Enemy{
         this.enemy.setParent(this.enemyPivot)
         this.enemyPivot.setParent(this.planet)
 
-        //this.direction=this.getMoveDirection()
         if(position.x>0) this.direction=-1
-        //debug
-        /*
-        var rotation = new BABYLON.Quaternion.Identity()
-            
-        var R=this.enemyPivot.getWorldMatrix().decompose(BABYLON.Vector3.Zero(), rotation, new BABYLON.Vector3.Zero())
-        if (this.enemyPivot.rotationQuaternion) {
-            console.log(this.enemyPivot.rotationQuaternion.copyFrom(rotation).toEulerAngles())
-            } else {
-            rotation.toEulerAnglesToRef(this.enemyPivot.rotation)
-            }
-        */
-        
 
     }
 
