@@ -24,6 +24,13 @@ class Enemy{
 
         //distance traveled in this step
         this.distanceStepMoved=0
+
+        // how many times it was hit by a bullet
+        this.numHits = 0;
+
+        // to change its color when hit
+        this.mesh.material = new BABYLON.StandardMaterial("matEnemy", scene);
+        this.mesh.material.diffuse = new BABYLON.Color3(1, 1, 1);
     }
 
     spawn(position=new BABYLON.Vector3(0,0,0)){
@@ -31,7 +38,7 @@ class Enemy{
         const currentTime = new Date().getTime();
 
         this.enemy=this.mesh.createInstance()
-        this.enemy.position=position
+        this.enemy.position=position;
         if(DEBUG) this.enemyPivot = BABYLON.Mesh.CreateCapsule(`enemyPivot`, { radiusTop: 0.05 }, scene);
         else this.enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
 
@@ -43,6 +50,9 @@ class Enemy{
 
         this.enemy.setParent(this.enemyPivot)
         this.enemyPivot.setParent(this.planet)
+
+        this.enemy.checkCollisions = true;
+        this.enemy.showBoundingBox = true;
 
     }
 
@@ -76,6 +86,20 @@ class Enemy{
 
     updateTarget(target){
         this.target=target
+    }
+
+    // If the enemy is hit once it becomes red, when it's hit the second
+    // time it disappears
+    whenHit() {
+        this.numHits += 1;
+        if (this.numHits > 1) {
+            this.enemy.dispose();
+            return 1;
+        }
+        else {
+            this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
+            return 0;
+        }
     }
 
 }
