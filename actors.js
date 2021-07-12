@@ -1,5 +1,5 @@
 class Enemy{
-    constructor(mesh,planet,target,DEBUG=true,scene){
+    constructor(mesh,planet,target,bulletMesh,enemyType,DEBUG=true,scene){
         this.mesh=mesh
 
         this.enemy=null
@@ -30,6 +30,16 @@ class Enemy{
 
         // how many times it was hit by a bullet
         this.numHits = 0;
+
+        
+        this.bullet=bulletMesh
+
+        //1: shooter
+        //2: follow player
+        this.enemyType=enemyType
+        this.bulletCount=1
+
+        this.DEBUG=DEBUG
 
         // to change its color when hit
         this.mesh.material = new BABYLON.StandardMaterial("matEnemy", scene);
@@ -121,18 +131,89 @@ class Enemy{
             return 0;
         }
     }
+
+    shoot(){
+        var projectiles=bulletGen(this.bullet,this.bulletCount,this.enemy,this.planet,
+            "parallel",scene)
+        for (var pr=0; pr<projectiles.length;pr++) bullets.push(projectiles[pr]);
+    }
   
 }
 //serve la classe proiettile?
-/*
 class Bullet{
-    constructor(mesh,planet,target){
+    constructor(mesh,shooter=null,planet,scene){
         this.mesh=mesh
+        this.planet=planet
 
         this.bullet=null
         this.pivot=null
 
+        //movement
+        this.axis=null
+        this.direction=null
+
+        this.shooter=shooter
+
+        //stats
+        this.bulletAngleOffset = pi/12;
+        this.bulletHorizOffset = 0.5;
+
+        this.bulletSpeed = Math.PI / 300;
+        this.bulletHeight = 1;
+
+        this.bulletRange = 150;
+
         
+    }/*
+    setSpeed(speed) {
+        this.bulletSpeed=speed
+    }
+    setRange(range) {
+        this.bulletRange=range
+    }*/
+    spawn(dir){
+        const currentTime = new Date().getTime();
+    
+        //get width of bullet
+        var mesh=this.mesh
+        
+    
+        bulletHorizOffset = mesh.getBoundingInfo().boundingBox.extendSize.x;
+    
+        var dir;
+        
+        if(DEBUG) this.pivot = BABYLON.Mesh.CreateCapsule(`${currentTime}pivot$`, { radiusTop: 0.05 }, scene); // capsule is visible for debug
+        else this.pivot = new BABYLON.TransformNode(`${currentTime}pivot$`); // transformNode is invisible
+        //get instance from pre-loaded model
+    
+        this.bullet = mesh.createInstance();
+        this.bullet.scaling = new BABYLON.Vector3(0.15,0.15,0.15);
+        var shooterPos = this.shooter.getAbsolutePosition();
+        this.bullet.position = shooterPos;
+    
+        //this.bullet.rotation.y=90
+        // dir is the direction of the cannon basically
+        this.bullet.rotation.z = dir;
+        this.pivot.rotation.z = dir;
+    
+        this.bullet.setParent(this.pivot);
+        this.pivot.setParent(this.planet);
+    
+        this.axis = new BABYLON.Vector3(dir, 0, 0);
+        this.direction = dir > 0 ? 1 : -1;
+    
+        //slightly higher in order to not collide with ground immediately
+        this.bullet.locallyTranslate(new BABYLON.Vector3(0, 0, -this.bulletHeight));
+        //little forward w.r.t shooter
+        this.bullet.locallyTranslate(new BABYLON.Vector3(0, 1.5, 0));
+    
+        //this.bullet.material = new BABYLON.StandardMaterial("bulletmat", scene);
+        this.bullet.checkCollisions = true;    
+    
+    }
+
+    move() {
+        this.bullet.locallyTranslate(new BABYLON.Vector3(0, 0, 1/this.bulletRange));
+        this.pivot.rotate(this.axis, this.bulletSpeed * this.direction, BABYLON.Space.LOCAL);
     }
 }
-*/

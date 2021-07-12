@@ -39,6 +39,12 @@ var bulletAngleOffset = pi/12;
 var bulletHorizOffset = 0.5;
 
 
+var playerLife=100
+
+//enemy stats
+var enemyShooterType=1
+var enemyWalkerType=2
+
 //other stats
 var planetDiameter = 6;
 var planetRadius = planetDiameter/2;
@@ -131,15 +137,11 @@ function uniformlyDistribute(mesh,ground,density=0.5,collisions=false,scene){
     return objects;
 }
 
+function bulletGen(mesh,bulletCount=1,shooter=null,ground,
+    mode="parallel",bulletAngleOffset=bulletAngleOffset,bulletHorizOffset=0.5,
+    range=bulletRange, speed=bulletSpeed,scene) {
 
-//create a bullet
-// count = number of projectiles
-function createBullet(mesh,count,shooter,ground,mode="parallel",scene) {
-    
-    const currentTime = new Date().getTime();
-
-    //get width of bullet
-    bulletHorizOffset = mesh.getBoundingInfo().boundingBox.extendSize.x;
+    bulletHorizOffset = mesh.getBoundingInfo().boundingBox.extendSize.x*1.1;
 
     var dir;
     
@@ -150,54 +152,26 @@ function createBullet(mesh,count,shooter,ground,mode="parallel",scene) {
     }
 
     projectiles = [];
-    for (var i=0;i<count;i++) {
-        
-        var projectile = {};
-        
-        //var bullet = BABYLON.Mesh.CreateSphere(`${currentTime}bullet${i}`, 16, .5, scene);
-        var pivot;
-        if(DEBUG) pivot = BABYLON.Mesh.CreateCapsule(`${currentTime}pivot${i}`, { radiusTop: 0.05 }, scene); // capsule is visible for debug
-        else pivot = new BABYLON.TransformNode(`${currentTime}pivot${i}`); // transformNode is invisible
-        //get instance from pre-loaded model
-        var bullet = mesh.createInstance();
-        bullet.scaling = new BABYLON.Vector3(0.15,0.15,0.15);
-        //var bullet = BABYLON.Mesh.CreateCapsule(`${currentTime}bullet${i}`, { radiusTop: 0.1 }, scene);
-        var shooterPos = shooter.getAbsolutePosition();
-        bullet.position = shooterPos;
+    var bullet;
+    for (var i=0;i<bulletCount;i++) {
+        bullet=new Bullet(mesh,shooter,ground,scene)
+        bullet.spawn(dir)
+        /*
+        bullet.bulletSpeed=speed
+        bullet.bulletRange=range
+        */
+        projectiles.push(bullet);
 
-        //bullet.rotation.y=90
-        // dir is the direction of the cannon basically
-        bullet.rotation.z = dir;
-        pivot.rotation.z = dir;
-
-        bullet.setParent(pivot);
-        pivot.setParent(ground);
-
-        projectile["axis"] = new BABYLON.Vector3(dir, 0, 0);
-        projectile["direction"] = dir > 0 ? 1 : -1;
-
-
-
-        //slightly higher in order to not collide with ground immediately
-        bullet.locallyTranslate(new BABYLON.Vector3(0, 0, -bulletHeight));
-        bullet.locallyTranslate(new BABYLON.Vector3(0, 1.5, 0));
-        if(mode=="parallel") bullet.locallyTranslate(new BABYLON.Vector3(horizPosition, 0, 0));
-
-        bullet.material = new BABYLON.StandardMaterial("bulletmat", scene);
-        bullet.checkCollisions = true;    
-        bullet.showBoundingBox = true;
-    
-        projectile["bullet"] = bullet;
-        projectile["pivot"] = pivot;
-        
-
-        projectiles.push(projectile);
-
+        if(mode=="parallel") {
+            bullet.bullet.locallyTranslate(new BABYLON.Vector3(horizPosition, 0, 0));
+            horizPosition += bulletHorizOffset;
+        }
         if (mode=="arc") dir += bulletAngleOffset;
-        horizPosition += bulletHorizOffset;
+    
     }
-    return projectiles;
+    return projectiles
 }
+
 
 //rotate obj from A to B
 function rotateTowards(obj,A,B){
@@ -209,6 +183,20 @@ function rotateTowards(obj,A,B){
     obj.rotate(new BABYLON.Vector3(1, 0 ,0), Math.PI/2);
 }
 
+function createEnemies(){   
+    //CREATE ENEMIES
+    var mesh = BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
+    //mesh.visibility=0.5
+    mesh.setEnabled(false);
+    var numEnemies=1
+    for(var i=0;i<numEnemies;i++) {
+        var position=randomPos(planetRadius)
+        var enemyBullet=assets.assetMeshes.get("rocketTest.babylon");
+        var enemy=new Enemy(mesh,ground,player,enemyBullet,enemyShooterType,DEBUG,scene)
+        enemy.spawn(position)
+        enemies.push(enemy)
+    }
+}
 
 //
 //---------------CREATE SCENE-----------
@@ -285,7 +273,7 @@ assetsPath.forEach(asset => {
         console.log('loaded and stored '+asset);
         task.loadedMeshes[0].setEnabled(false);
         assets.assetMeshes.set(asset, task.loadedMeshes[0]);
-        
+        if(asset=="rocketTest.babylon") createEnemies()
     }
     meshTask.onError = function (task, message, exception) {
         console.log(message, exception);
@@ -331,17 +319,7 @@ console.log("loading has ended");
 //var mesh=assets.assetMeshes.get("rocketTest.babylon")
 //uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
 
-//CREATE ENEMIES
-var mesh = BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
-//mesh.visibility=0.5
-mesh.setEnabled(false);
-var numEnemies=1
-for(var i=0;i<numEnemies;i++) {
-    var position=randomPos(planetRadius)
-    var enemy=new Enemy(mesh,ground,player,DEBUG,scene)
-    enemy.spawn(position)
-    enemies.push(enemy)
-}
+
 
 //------------INPUT READING--------------
 
@@ -406,7 +384,8 @@ if (inputMap["h"] && currentTime > nextBulletTime) {
     //avoid singular case
     if (player.rotation.z == 0) player.rotation.z += 0.001;
     var mesh=assets.assetMeshes.get("rocketTest.babylon");
-    var projectiles=createBullet(mesh,bulletCount,player,ground,mode="arc",scene);
+    var projectiles=bulletGen(mesh,bulletCount,player,ground,
+        "parallel",bulletAngleOffset,bulletHorizOffset,scene)
     // bullets is all existing bullets, projectiles is the bullets fired at once
     for (var pr=0; pr<projectiles.length;pr++) bullets.push(projectiles[pr]);
     nextBulletTime = new Date().getTime() + attackSpeed;
@@ -419,23 +398,19 @@ scene.registerBeforeRender(function () {
 //with no bullet array is empty
 for (var idx = 0; idx < bullets.length; idx++) {
 
-    var pivot = bullets[idx]["pivot"];
-    var axis = bullets[idx]["axis"];
-    var direction = bullets[idx]["direction"];
+    var bullet = bullets[idx];
+    var pivot=bullet.pivot
+    var bulletMesh=bullet.bullet
+    bullet.move()
 
-    var bullet = bullets[idx]["bullet"];
-
-    bullet.locallyTranslate(new BABYLON.Vector3(0, 0, 1/bulletRange));
-
-    pivot.rotate(axis, bulletSpeed * direction, BABYLON.Space.LOCAL);
     
-    
-    var bulletFall = BABYLON.Vector3.Distance(bullet.position,ground.position) < planetDiameter/2;
+    var bulletFall = BABYLON.Vector3.Distance(bulletMesh.position,ground.position) < planetDiameter/2;
     //bulletFall=false
     //collision with ground
+    
     if (bulletFall) {
-        bullet.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
-        bullet.dispose();    // delete from scene
+        bulletMesh.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
+        bulletMesh.dispose();    // delete from scene
         pivot.dispose();
         bullets.splice(idx,1);   // delete from array
         
@@ -443,14 +418,14 @@ for (var idx = 0; idx < bullets.length; idx++) {
     //collision with objects
     collidingObjects.forEach(objects => {
         for( var i=0; i<objects.length;i++){
-            if (bullet.intersectsMesh(objects[i], false)){
-                console.log("object hit");
-                bullet.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
+            if (bulletMesh.intersectsMesh(objects[i], false)){
+                bulletMesh.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
                 objects[i].dispose();
                 objects.splice(i,1);  
             }
         }
     })
+    
 
     // ---- PERCHÉ QUESTO NON FUNZIONA? ----
     /*
@@ -469,10 +444,12 @@ for (var idx = 0; idx < bullets.length; idx++) {
     */
     
     for (let j=0; j<enemies.length; j++) {
-            if (bullet.intersectsMesh(enemies[j].enemy, false)) {
+            if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
                 console.log("enemy hit");
-                enemies[j].whenHit();
-                bullet.dispose();
+                dead=enemies[j].whenHit();
+                if (dead) enemies.splice(j, 1);
+                bulletMesh.dispose();
+                pivot.dispose();
                 bullets.splice(idx, 1);
             }
     }
