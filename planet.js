@@ -306,8 +306,7 @@ immAssetsPath.forEach(asset => {
         console.log('loaded and stored '+asset);
         task.loadedMeshes[0].setEnabled(false);
         //assets.assetMeshes.set(asset, task.loadedMeshes[0]);
-        uniformlyDistribute(task.loadedMeshes[0], 
-            ground, density=0.5, collisions=true, scene);
+        //uniformlyDistribute(task.loadedMeshes[0], ground, density=0.5, collisions=true, scene);
         
     }
     meshTask.onError = function (task, message, exception) {
@@ -358,7 +357,11 @@ inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
 
 let nextBulletTime = new Date().getTime();
 // do the following every time before rendering a frame
+
+var positionUpdated=false
+
 scene.onBeforeRenderObservable.add(() => {
+
 if (inputMap["w"] || inputMap["ArrowUp"]) {
     wheelR.rotation.x += 0.05;
     wheelL.rotation.x += 0.05;
@@ -368,7 +371,7 @@ if (inputMap["w"] || inputMap["ArrowUp"]) {
     
     if (PLAYERMOVE) playerPivot.rotate(dir, Math.PI / 150, BABYLON.Space.WORLD);  // the player moves, the planet stays still
     else ground.rotate(dir, -Math.PI / 150, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
-    
+    positionUpdated=true
 }
 if (inputMap["a"] || inputMap["ArrowLeft"]) {
     wheelR.rotation.x += 0.05;
@@ -386,12 +389,14 @@ if (inputMap["s"] || inputMap["ArrowDown"]) {
      
     if (PLAYERMOVE) playerPivot.rotate(dir, -Math.PI / 150, BABYLON.Space.WORLD);
     else ground.rotate(dir, Math.PI / 150, BABYLON.Space.WORLD);
+    positionUpdated=true
     
 }
 if (inputMap["d"] || inputMap["ArrowRight"]) {
     wheelR.rotation.x -= 0.05;
     wheelL.rotation.x += 0.05;
     player.rotation.z -= rotationSpeed;
+    
 }
 
 //shoot
@@ -482,7 +487,11 @@ for (var idx = 0; idx < bullets.length; idx++) {
 scene.registerBeforeRender(function () {   
     for (var idx = 0; idx < enemies.length; idx++) {
         enemies[idx].moveStep()
-        //enemies[idx].updateTarget(player)
+        if(positionUpdated) {
+            positionUpdated=false
+            enemies[idx].updatePosition()
+        }
+        //
     }
 })
 
