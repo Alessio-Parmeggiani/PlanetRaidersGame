@@ -292,7 +292,7 @@ assetsPath.forEach(asset => {
     }
 });
 
-
+// Loading assets that appear immediately
 immAssetsPath.forEach(asset => {
     
     const name='load '+asset;
@@ -313,17 +313,7 @@ immAssetsPath.forEach(asset => {
         console.log(message, exception);
     }
 });
-/*
-// Loading assets that appear immediately
-const grassMeshTask = assetsManager.addMeshTask("grass task", "",
-     "./", "grass.babylon");
 
-grassMeshTask.onSuccess = (task) => {
-    task.loadedMeshes[0].setEnabled(false);
-    uniformlyDistribute(task.loadedMeshes[0], 
-        ground, density=0.5, collisions=true, scene);
-}
-*/
 assetsManager.onFinish = function(tasks) {
     console.log("finish")       
     engine.runRenderLoop(function () {
@@ -340,13 +330,6 @@ console.log("loading has ended");
 //mesh.setEnabled(false);
 //var mesh=assets.assetMeshes.get("rocketTest.babylon")
 //uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
-
-// ---- ADDING GRASS ---- 
-//console.log(BABYLON.AssetTaskState);
-//var grass = assets.assetMeshes.get("grass.babylon");
-//console.log(assets);
-//uniformlyDistribute(grass,ground,density=0.5,collisions=true,scene);
-
 
 //CREATE ENEMIES
 var mesh = BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
@@ -370,7 +353,6 @@ inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
 scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {
 inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
 }));
-
 
 
 let nextBulletTime = new Date().getTime();
@@ -462,12 +444,39 @@ for (var idx = 0; idx < bullets.length; idx++) {
     collidingObjects.forEach(objects => {
         for( var i=0; i<objects.length;i++){
             if (bullet.intersectsMesh(objects[i], false)){
-                bullet.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
+                console.log("object hit");
+                bullet.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
                 objects[i].dispose();
                 objects.splice(i,1);  
             }
         }
     })
+
+    // ---- PERCHÉ QUESTO NON FUNZIONA? ----
+    /*
+    enemies.forEach(objects => {
+        for (var i=0; i<objects.length; i++) {
+            if (bullet.intersectsMesh(objects[i].enemy, false)){
+                console.log("enemy hit");
+                bullet.dispose();
+                pivot.dispose();
+                bullets.splice(idx, 1);
+                // If the enemy is eliminated, delete it from array
+                if (objects[i].whenHit()) objects.splice(i, 1);
+            }
+        }
+    })
+    */
+    
+    for (let j=0; j<enemies.length; j++) {
+            if (bullet.intersectsMesh(enemies[j].enemy, false)) {
+                console.log("enemy hit");
+                enemies[j].whenHit();
+                bullet.dispose();
+                bullets.splice(idx, 1);
+            }
+    }
+
 }
 
 });
