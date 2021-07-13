@@ -56,6 +56,7 @@ const assets = {
 //assets needed later
 const assetsPath = [
     "rocketTest.babylon",
+    "grass.babylon"
 ]
 
 //assets to be used immediately
@@ -172,7 +173,6 @@ function bulletGen(mesh,bulletCount=1,shooter=null,ground,
     return projectiles
 }
 
-
 //rotate obj from A to B
 function rotateTowards(obj,A,B){
     var direction = B.position.subtract(A.position);
@@ -199,16 +199,10 @@ function createEnemies(){
 }
 
 //
-//---------------CREATE SCENE-----------
+//----------------MAIN LOOP--------------------
 //
-
-var createScene = function () {
-
-console.log("starting");
-var scene = new BABYLON.Scene(engine);
-scene.collisionsEnabled = true;
-//arc rotate camera is a type of camera that orbit the target.
-
+function main(){
+    
 var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, 1.2, 10, new BABYLON.Vector3(0, 0, 0), scene);
 
 //mainly for debug, control rotation of camera with mouse
@@ -251,75 +245,11 @@ if (DEBUG) {
     player.visibility = 0.8;
 }
 
-//------------LOAD ASSETS--------------
-var currentTime=new Date().getTime();
-
-console.log("Loading assets...");
-console.log(assets);
-
-var assetsManager = new BABYLON.AssetsManager(scene);
-
-// Loading assets that don't need to appear immediately
-assetsPath.forEach(asset => {
-    
-    const name='load '+asset;
-    const path='./';
-    const meshTask = assetsManager.addMeshTask(name, "", path, asset);
-    console.log("loading : "+ asset);
-    
-    
-    meshTask.onSuccess = (task) => {
-        // disable the original mesh and store it in the data structure
-        console.log('loaded and stored '+asset);
-        task.loadedMeshes[0].setEnabled(false);
-        assets.assetMeshes.set(asset, task.loadedMeshes[0]);
-        if(asset=="rocketTest.babylon") createEnemies()
-    }
-    meshTask.onError = function (task, message, exception) {
-        console.log(message, exception);
-    }
-});
-
-// Loading assets that appear immediately
-immAssetsPath.forEach(asset => {
-    
-    const name='load '+asset;
-    const path='./';
-    const meshTask = assetsManager.addMeshTask(name, "", path, asset);
-    console.log("loading : "+ asset);
-    
-    
-    meshTask.onSuccess = (task) => {
-        // disable the original mesh and store it in the data structure
-        console.log('loaded and stored '+asset);
-        task.loadedMeshes[0].setEnabled(false);
-        //assets.assetMeshes.set(asset, task.loadedMeshes[0]);
-        //uniformlyDistribute(task.loadedMeshes[0], ground, density=0.5, collisions=true, scene);
-        
-    }
-    meshTask.onError = function (task, message, exception) {
-        console.log(message, exception);
-    }
-});
-
-assetsManager.onFinish = function(tasks) {
-    console.log("finish")       
-    engine.runRenderLoop(function () {
-        scene.render();
-    });
-};
-
-assetsManager.load();   // do all the tasks
-console.log("loading has ended");
-
 
 //---------POPULATE PLANET---------------
-//var mesh = BABYLON.MeshBuilder.CreateSphere("Rocks", {diameter: 0.2 }, scene);
-//mesh.setEnabled(false);
-//var mesh=assets.assetMeshes.get("rocketTest.babylon")
-//uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
-
-
+var mesh=assets.assetMeshes.get("grass.babylon")
+uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
+createEnemies()
 
 //------------INPUT READING--------------
 
@@ -415,7 +345,7 @@ for (var idx = 0; idx < bullets.length; idx++) {
         bullets.splice(idx,1);   // delete from array
         
     }
-    //collision with objects
+    //collision bullet objects
     collidingObjects.forEach(objects => {
         for( var i=0; i<objects.length;i++){
             if (bulletMesh.intersectsMesh(objects[i], false)){
@@ -426,23 +356,7 @@ for (var idx = 0; idx < bullets.length; idx++) {
         }
     })
     
-
-    // ---- PERCHÉ QUESTO NON FUNZIONA? ----
-    /*
-    enemies.forEach(objects => {
-        for (var i=0; i<objects.length; i++) {
-            if (bullet.intersectsMesh(objects[i].enemy, false)){
-                console.log("enemy hit");
-                bullet.dispose();
-                pivot.dispose();
-                bullets.splice(idx, 1);
-                // If the enemy is eliminated, delete it from array
-                if (objects[i].whenHit()) objects.splice(i, 1);
-            }
-        }
-    })
-    */
-    
+    //collision bullet-enemies
     for (let j=0; j<enemies.length; j++) {
             if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
                 console.log("enemy hit");
@@ -458,8 +372,6 @@ for (var idx = 0; idx < bullets.length; idx++) {
 
 });
 
-
-
 //Move enemies
 scene.registerBeforeRender(function () {   
     for (var idx = 0; idx < enemies.length; idx++) {
@@ -472,9 +384,48 @@ scene.registerBeforeRender(function () {
     }
 })
 
+}//END MAIN
 
+//Asset loading and start
+var createScene = function () {
+
+console.log("starting");
+scene = new BABYLON.Scene(engine);
+scene.collisionsEnabled = true;
+//arc rotate camera is a type of camera that orbit the target.
+console.log("Loading assets...");
+console.log(assets);
+
+var assetsManager = new BABYLON.AssetsManager(scene);
+
+// Loading assets that don't need to appear immediately
+assetsPath.forEach(asset => {
+    
+    const name='load '+asset;
+    const path='./';
+    const meshTask = assetsManager.addMeshTask(name, "", path, asset);
+    console.log("loading : "+ asset);
+    
+    meshTask.onSuccess = (task) => {
+        // disable the original mesh and store it in the data structure
+        console.log('loaded and stored '+asset);
+        task.loadedMeshes[0].setEnabled(false);
+        assets.assetMeshes.set(asset, task.loadedMeshes[0]);
+    }
+    meshTask.onError = function (task, message, exception) {
+        console.log(message, exception);
+    }
+});
+
+assetsManager.onFinish = function(tasks) {
+    console.log("Finished loading assets")    
+    main()
+};
+
+
+assetsManager.load();   // do all the tasks
+console.log("loading has ended");
 return scene;
-
 
 };
 //END OF SCENE CREATION
