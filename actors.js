@@ -30,7 +30,8 @@ class Enemy{
 
         // how many times it was hit by a bullet
         this.numHits = 0;
-
+        
+        this.healthBar = null;
         
         this.bullet=bulletMesh
 
@@ -46,7 +47,7 @@ class Enemy{
         this.mesh.material.diffuse = new BABYLON.Color3(1, 1, 1);
     }
 
-    spawn(position=new BABYLON.Vector3(0,0,0)){
+    spawn(position=new BABYLON.Vector3(0,0,0), light){
         console.log("creating enemy at: "+position)
         //time used for naming
         const currentTime = new Date().getTime();
@@ -66,9 +67,11 @@ class Enemy{
         this.enemyPivot.setParent(this.planet)
 
         if(position.x>0) this.direction=-1
+
+        this.healthBar = new HealthBar(this.enemy, light, this.scene);
       
         this.enemy.checkCollisions = true;
-        this.enemy.showBoundingBox = true;
+        //this.enemy.showBoundingBox = true;
     }
 
     moveStep(){
@@ -122,7 +125,7 @@ class Enemy{
     // time it disappears
     whenHit() {
         this.numHits += 1;
-        if (this.numHits > 1) {
+        if (this.numHits > 2) {
             this.enemy.dispose();
             return 1;
         }
@@ -215,5 +218,47 @@ class Bullet{
     move() {
         this.bullet.locallyTranslate(new BABYLON.Vector3(0, 0, 1/this.bulletRange));
         this.pivot.rotate(this.axis, this.bulletSpeed * this.direction, BABYLON.Space.LOCAL);
+    }
+}
+
+class HealthBar {
+    constructor(player, light, scene, enemy=true) {
+        this.player = player;
+
+        this.mesh = BABYLON.MeshBuilder.CreateCylinder("healthbar",
+            {height: 0.8, diameter: 0.15}, scene);
+
+        this.mesh.parent = player;
+
+        if (enemy) {
+            //this.mesh.position.z = -0.5;
+            this.mesh.position.y = 0.5;
+        }
+        else this.mesh.position.z = -0.5;
+        
+        this.mesh.rotation.z = pi/2;
+
+        this.mesh.material = new BABYLON.StandardMaterial("healthbar", scene);
+        this.mesh.material.emissiveColor = new BABYLON.Color3(0, 1, 0);
+        light.excludedMeshes.push(this.mesh);
+        
+        var gl = new BABYLON.GlowLayer("glow", scene);
+        gl.intensity = 0.3;
+        gl.addIncludedOnlyMesh(this.mesh);
+
+        // to make the healthbar always face the camera
+        //this.mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Z || BABYLON.Mesh.BILLBOARDMODE_X;
+    }
+
+    whenHit() {
+        this.mesh.scaling.y -= 0.33;
+
+        if (this.mesh.scaling.y > 0.5) {
+            this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0.8, 0);
+        } else if (this.mesh.scaling.y > 0.3) {
+            this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
+        } else {
+            this.mesh.dispose();
+        }
     }
 }

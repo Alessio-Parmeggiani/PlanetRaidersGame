@@ -183,7 +183,7 @@ function rotateTowards(obj,A,B){
     obj.rotate(new BABYLON.Vector3(1, 0 ,0), Math.PI/2);
 }
 
-function createEnemies(){   
+function createEnemies(light){   
     //CREATE ENEMIES
     var mesh = BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
     //mesh.visibility=0.5
@@ -193,7 +193,7 @@ function createEnemies(){
         var position=randomPos(planetRadius)
         var enemyBullet=assets.assetMeshes.get("rocketTest.babylon");
         var enemy=new Enemy(mesh,ground,player,enemyBullet,enemyShooterType,DEBUG,scene)
-        enemy.spawn(position)
+        enemy.spawn(position, light);
         enemies.push(enemy)
     }
 }
@@ -235,6 +235,8 @@ planetMaterial.diffuseTexture = grassTexture;
 ground.material = planetMaterial;
 
 player.scaling = new BABYLON.Vector3(0.4,0.4,0.4);
+// to avoid that the scaling influences also its children (i.e. the health bar)
+player.bakeCurrentTransformIntoVertices();
 player.position.z = -planetDiameter / 2;
 
 
@@ -249,7 +251,11 @@ if (DEBUG) {
 //---------POPULATE PLANET---------------
 var mesh=assets.assetMeshes.get("grass.babylon")
 uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
-createEnemies()
+createEnemies(light);
+
+// ------------ SHOW UI -----------------
+
+var playerHealth = new HealthBar(player, light, scene, false);
 
 //------------INPUT READING--------------
 
@@ -361,6 +367,7 @@ for (var idx = 0; idx < bullets.length; idx++) {
             if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
                 console.log("enemy hit");
                 dead=enemies[j].whenHit();
+                enemies[j].healthBar.whenHit(light, scene);
                 if (dead) enemies.splice(j, 1);
                 bulletMesh.dispose();
                 pivot.dispose();
