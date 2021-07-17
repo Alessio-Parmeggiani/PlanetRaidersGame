@@ -1,24 +1,45 @@
+html {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
 body {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
     padding: 0;
     margin: 0;
     text-align: center;
-    background-color: cornflowerblue;
+    background-color: black;
+}
+
+#renderCanvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    transition: 1s ease;
+}
+
+.anim-canvas {
+    opacity: 70%;
 }
 
 div {
     font-family: 'Poppins', sans-serif;
+    color: white;
     text-align: center;
     position: absolute;
-    top: 70%;
+    top: 110%;
     left: 50%;
     opacity: 0%;
     transform: translate(-50%, -50%);
 }
 
-.first {
+.anim-first {
     animation-name: text;
     animation-duration: 3.5s;
-    animation-fill-mode: forwards;
     animation-timing-function: ease-in-out;
 }
 
@@ -63,11 +84,14 @@ div {
     flex-wrap: wrap;
     text-align: center;
     justify-content: space-evenly;
-    top: 70%;
+    top: 200%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 40%;
     opacity: 0%;
+}
+
+.anim-container {
     animation-name: buttons;
     animation-duration: 1s;
     animation-fill-mode: forwards;
@@ -93,7 +117,7 @@ button {
 
 button:hover {
     background-color: white;
-    color: cornflowerblue;
+    color: black;
     cursor: pointer;
 }
 
@@ -101,11 +125,28 @@ button:active {
     transform: scale(.94);
 }
 
+/*
+button:focus::after {
+    position: absolute;
+    font-family: arial;
+    content: "L";
+    text-align: center;
+    color:rgb(19, 90, 221);
+    transform: scaleX(-1) rotate(-35deg);
+}
+
+span.success {
+    display: none;
+}
+*/
 #upgrade {
     font-style: italic;
     font-weight: 800;
     font-size: 35px;
     text-transform: uppercase;
+}
+
+.anim-upgrade {
     animation-name: text-upgrade;
     animation-duration: 1.5s;
     animation-fill-mode: forwards;

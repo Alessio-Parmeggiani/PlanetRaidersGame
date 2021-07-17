@@ -3,6 +3,12 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@1,800" rel="stylesheet"> 
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400" rel="stylesheet"> 
+        <link rel="stylesheet" href="victory.css">
+
         <title>Babylon.js sample code</title>
 
         <!-- Babylon.js -->
@@ -19,28 +25,21 @@
         <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
         <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
         <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
-
-
-        <style>
-            html, body {
-                overflow: hidden;
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-
-            #renderCanvas {
-                width: 100%;
-                height: 100%;
-                touch-action: none;
-            }
-        </style>
     </head>
-<body>
-    <canvas id="renderCanvas"></canvas>
-    <script src="actors.js" ></script>
-    <script src="planet.js" ></script>
-
-</body>
+    <body>
+        <canvas id="renderCanvas"></canvas>
+        <script src="actors.js" ></script>
+        <script src="planet.js" ></script>
+        <div id="congrats">Congratulations!</div>
+        <div id="message">You beat all the enemies</div>
+        <div id="upgrade">Choose your upgrade</div>
+        <div id="container">
+            <button><span>Player speed up</span></button>
+            <button><span>Bullets +1</span></button>
+            <button><span>Arc bullets</span></button>
+            <button><span>Bullets speed up</span></button>
+            <button><span>Bullets range up</span></button>
+            <button><span>Rotation speed up</span></button>
+        </div>
+    </body>
 </html>

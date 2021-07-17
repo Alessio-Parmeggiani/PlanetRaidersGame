@@ -70,6 +70,25 @@ var collidingObjects = [];
 var enemies = [];
 
 
+/*
+// ------- BUTTON MANAGER -------
+document.addEventListener("DOMContentLoaded", function(e) {
+    var buttons = document.getElementsByTagName("button");
+    var spans = document.getElementsByTagName("span");
+    console.log(buttons);
+    console.log(spans);
+    for (var butt=0; butt < buttons.length; butt++) {
+        //console.log(buttons);
+        buttons[butt].onclick = function() {
+            console.log("clicked");
+            spans[butt].classList.add("success");
+            for (var span=0; span<spans.length; span++) {
+                spans[span].classList.add("success");
+            }
+        }
+    }
+});
+*/
 
 //get a random position on surface of sphere
 function randomPos(radius){
@@ -197,6 +216,15 @@ function createEnemies(light){
         enemies.push(enemy)
     }
 }
+
+function endLevel() {
+    console.log("endLevel called");
+   document.getElementById("congrats").classList.add("anim-first");
+   document.getElementById("message").classList.add("anim-first");
+   document.getElementById("container").classList.add("anim-container");
+   document.getElementById("upgrade").classList.add("anim-upgrade");
+   document.getElementById("renderCanvas").classList.add("anim-canvas");
+}   
 
 //
 //----------------MAIN LOOP--------------------
@@ -372,6 +400,11 @@ for (var idx = 0; idx < bullets.length; idx++) {
                 bulletMesh.dispose();
                 pivot.dispose();
                 bullets.splice(idx, 1);
+
+                if (enemies.length == 0) {
+                    console.log("all enemies dead");
+                    endLevel();
+                }
             }
     }
 
