@@ -29,7 +29,7 @@ class Enemy{
         this.direction=1
 
         // how many times it was hit by a bullet
-        this.numHits = 0;
+        this.life = 10;
         
         this.healthBar = null;
         
@@ -68,7 +68,7 @@ class Enemy{
 
         if(position.x>0) this.direction=-1
 
-        this.healthBar = new HealthBar(this.enemy, light, this.scene);
+        this.healthBar = new HealthBar(this.enemy, light, this.scene,true,this.life);
       
         this.enemy.checkCollisions = true;
         //this.enemy.showBoundingBox = true;
@@ -89,8 +89,7 @@ class Enemy{
         //var dir=1
         if (this.distanceStepMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime) {
             //move of velocity
-            
-            
+                      
             this.enemyPivot.rotate(direction,this.velocity*dir, BABYLON.Space.WORLD);
             this.distanceStepMoved+=this.velocity
         }
@@ -123,9 +122,10 @@ class Enemy{
 
     // If the enemy is hit once it becomes red, when it's hit the second
     // time it disappears
-    whenHit() {
-        this.numHits += 1;
-        if (this.numHits > 2) {
+    whenHit(damage) {
+        this.life-=damage
+        this.healthBar.whenHit(damage)
+        if (this.life < 0) {
             this.enemy.dispose();
             return 1;
         }
@@ -165,6 +165,8 @@ class Bullet{
         this.bulletHeight = 1;
 
         this.bulletRange = 150;
+
+        this.damage=1;
 
         
     }/*
@@ -222,13 +224,15 @@ class Bullet{
 }
 
 class HealthBar {
-    constructor(player, light, scene, enemy=true) {
+    constructor(player, light, scene, enemy=true,life) {
         this.player = player;
 
         this.mesh = BABYLON.MeshBuilder.CreateCylinder("healthbar",
             {height: 0.8, diameter: 0.15}, scene);
 
         this.mesh.parent = player;
+
+        this.life=life
 
         if (enemy) {
             //this.mesh.position.z = -0.5;
@@ -250,8 +254,11 @@ class HealthBar {
         //this.mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Z || BABYLON.Mesh.BILLBOARDMODE_X;
     }
 
-    whenHit() {
-        this.mesh.scaling.y -= 0.33;
+    whenHit(damage) {
+
+        //damage:full health = x : 1 (full bar)
+        //x=damage/full Health
+        this.mesh.scaling.y -= damage/this.life;
 
         if (this.mesh.scaling.y > 0.5) {
             this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0.8, 0);

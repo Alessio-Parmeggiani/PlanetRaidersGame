@@ -130,6 +130,16 @@ function orientSurface(object,position,ground) {
     BABYLON.Vector3.RotationFromAxisToRef(xaxis, yaxis, zaxis, object.rotation);
 }
 
+function getGlobalRotation(obj){
+    var scale = new BABYLON.Vector3(0, 0, 0);
+    var rotation = new BABYLON.Quaternion();
+    var translation = new BABYLON.Vector3(0,0,0);
+
+    var tempWorldMatrix = obj.getWorldMatrix();
+    tempWorldMatrix.decompose(scale, rotation, translation);
+    return rotation;
+
+}
 //uniformly distribute something on planet
 function uniformlyDistribute(mesh,ground,density=0.5,collisions=false,scene){
     
@@ -164,10 +174,10 @@ function bulletGen(mesh,bulletCount=1,shooter=null,ground,
     bulletHorizOffset = mesh.getBoundingInfo().boundingBox.extendSize.x*1.1;
 
     var dir;
-    
-    if (mode=="arc") dir = shooter.rotation.z - ((bulletCount-1)/2 * bulletAngleOffset);
+    var playerRot=getGlobalRotation(player).toEulerAngles()
+    if (mode=="arc") dir = playerRot.z - ((bulletCount-1)/2 * bulletAngleOffset);
     else if (mode=="parallel") {
-        dir=shooter.rotation.z;
+        dir=playerRot.z;
         var horizPosition = -(bulletCount-1)/2 * bulletHorizOffset;
     }
 
@@ -344,7 +354,7 @@ if (inputMap["d"] || inputMap["ArrowRight"]) {
 //shoot
 const currentTime = new Date().getTime();
 if (inputMap["h"] && currentTime > nextBulletTime) {
-
+    
     //avoid singular case
     if (player.rotation.z == 0) player.rotation.z += 0.001;
     var mesh=assets.assetMeshes.get("rocketTest.babylon");
@@ -394,8 +404,7 @@ for (var idx = 0; idx < bullets.length; idx++) {
     for (let j=0; j<enemies.length; j++) {
             if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
                 console.log("enemy hit");
-                dead=enemies[j].whenHit();
-                enemies[j].healthBar.whenHit(light, scene);
+                dead=enemies[j].whenHit(bullet.damage);
                 if (dead) enemies.splice(j, 1);
                 bulletMesh.dispose();
                 pivot.dispose();
