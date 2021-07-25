@@ -1,4 +1,4 @@
-{"producer":{"name":"Blender","version":"2.93.1","exporter_version":"2.93.2","file":"grass.babylon"},
+{"producer":{"name":"Blender","version":"2.93.1","exporter_version":"2.93.2","file":"grass2.babylon"},
 "autoClear":true,"clearColor":[0.0509,0.0509,0.0509],"gravity":[0,-9.81,0],
 "materials":[{"name":"Material.001","id":"Material.001","customType":"BABYLON.PBRMaterial","useObjectSpaceNormalMap":true,"albedo":[0.0476,0.1679,0.0258],"emissive":[0,0,0],"reflectivity":[0.5,0.5,0.5],"roughness":0.5,"alpha":1,"transparencyMode":0,"alphaCutOff":0.4,"metallic":0}],
 "meshes":[{"name":"Plane","id":"Plane","materialId":"Material.001","billboardMode":0,"position":[0,0,0],"rotation":[0,0,0],"scaling":[1,1,1],"isVisible":true,"isEnabled":true,"pickable":false

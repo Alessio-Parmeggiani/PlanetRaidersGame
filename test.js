@@ -90,3 +90,23 @@ function createEnemy(mesh,position) {
     return enemyDict 
 }
 */
+
+
+//Creating the (temporary) player
+/*
+player = BABYLON.MeshBuilder.CreateBox("player", { size: 1, width: playerWidth,segments: 32 }, scene);
+
+if (PLAYERMOVE) {
+    var playerPivot = new BABYLON.TransformNode("root");
+    player.setParent(playerPivot);
+    camera.parent = playerPivot;
+} 
+
+var wheelR = BABYLON.MeshBuilder.CreateBox("playerWheelR", {size: 0.8, width: wheelWidth }, scene);
+wheelR.parent = player;
+wheelR.position.x = playerWidth/2 + wheelWidth/2;
+
+var wheelL = BABYLON.MeshBuilder.CreateBox("playerWheelL", {size: 0.8,width: wheelWidth  }, scene);
+wheelL.parent = player;
+wheelL.position.x = -(playerWidth/2 + wheelWidth/2);
+*/

@@ -12,17 +12,23 @@ Exporter version: 2.93.2, Blender version: 2.93.1
 		Texture directory   :  C:\Users\alessio\Desktop\PlanetGameEdit2\
 	Python World class constructor completed
 	WARNING: No active camera has been assigned, or is not in a currently enabled collection
-	processing begun of mesh:  Plane
-		processing begun of material:  Material.001
-		num positions      :  2260
-		num normals        :  2260
+	processing begun of mesh:  Base
+		processing begun of material:  Grey
+		processing begun of material:  LightBlue
+		processing begun of material:  Orange
+		processing begun of material:  WhitePlastic
+		processing begun of material:  LightRed
+		processing begun of material:  Glass
+		processing begun of multimaterial:  enemy.Multimaterial#0
+		num positions      :  11899
+		num normals        :  11899
 		num tangents       :  0
-		num uvs            :  4520
+		num uvs            :  23798
 		num uvs2           :  0
 		num colors         :  0
-		num triangles      :  864
+		num triangles      :  6878
 ========= Writing of JSON file started =========
-	writing mesh:  Plane
+	writing mesh:  Base
 ========= Writing of JSON file completed =========
 ========= end of processing =========
-elapsed time:  0 min, 0.091 secs
+elapsed time:  0 min, 0.704 secs

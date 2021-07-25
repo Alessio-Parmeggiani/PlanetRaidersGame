@@ -21,7 +21,7 @@ class Enemy{
         this.velocity=Math.PI/200
 
         //how much to wait before moving again, if 0 continue movement
-        this.moveInterval=500 //ms
+        this.moveInterval=5 //ms
 
         //distance traveled in this step
         this.distanceStepMoved=0
@@ -43,8 +43,8 @@ class Enemy{
         this.DEBUG=DEBUG
 
         // to change its color when hit
-        this.mesh.material = new BABYLON.StandardMaterial("matEnemy", scene);
-        this.mesh.material.diffuse = new BABYLON.Color3(1, 1, 1);
+        //this.mesh.material = new BABYLON.StandardMaterial("matEnemy", scene);
+        //this.mesh.material.diffuse = new BABYLON.Color3(1, 1, 1);
     }
 
     spawn(position=new BABYLON.Vector3(0,0,0), light){
@@ -56,9 +56,11 @@ class Enemy{
         this.enemy.position=position;
         if(DEBUG) this.enemyPivot = BABYLON.Mesh.CreateCapsule(`enemyPivot`, { radiusTop: 0.05 }, scene);
         else this.enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
-
+        //console.log(this.target)
         //rotate pivot towards player w.r.t enemy position
-        rotateTowards(this.enemyPivot,this.enemy,this.target)
+        var newTarget=getPointNearPosition(this.target.getAbsolutePosition(),0)
+        rotateTowards(this.enemyPivot,this.enemy.getAbsolutePosition(),newTarget)
+
         
         //orient enemy so that it's on surface along normal
         orientSurface(this.enemy,position,this.planet)
@@ -85,9 +87,9 @@ class Enemy{
         direction.normalize();
 
         var dir=this.direction
-        
+        this.enemy.addRotation(0,0.05,0)
         //var dir=1
-        if (this.distanceStepMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime) {
+        if (this.moveInterval<50 || (this.distanceStepMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime)) {
             //move of velocity
                       
             this.enemyPivot.rotate(direction,this.velocity*dir, BABYLON.Space.WORLD);
@@ -109,8 +111,10 @@ class Enemy{
        
         this.enemyPivot.rotation = BABYLON.Vector3.Zero()
         //da fare animato magari
-        
-        rotateTowards(this.enemyPivot,this.enemy,this.target)
+
+        //new target da scegliere ogni tot secondi
+        var newTarget=getPointNearPosition(this.target.getAbsolutePosition(),1)
+        rotateTowards(this.enemyPivot,this.enemy.getAbsolutePosition(),newTarget)
 
         if(this.enemy.getAbsolutePosition().x>0) this.direction=-1
         else this.direction=1
@@ -125,7 +129,7 @@ class Enemy{
     whenHit(damage) {
         this.life-=damage
         this.healthBar.whenHit(damage)
-        if (this.life < 0) {
+        if (this.life <= 0) {
             this.enemy.dispose();
             return 1;
         }
@@ -232,13 +236,22 @@ class HealthBar {
 
         this.mesh.parent = player;
 
-        this.life=life
+        this.startLife=life
+        this.remainingLife=life
+
+        this.greenThreshold=0.8
+        this.yellowThreshold=0.5
+        this.redThreshold=0.3
 
         if (enemy) {
             //this.mesh.position.z = -0.5;
-            this.mesh.position.y = 0.5;
+            //this.mesh.position.z = player.getBoundingInfo().boundingBox.extendSize.y;
+            this.mesh.position.y= player.getBoundingInfo().boundingBox.extendSize.z*1.4
         }
-        else this.mesh.position.z = -0.5;
+        else {
+            this.mesh.position.z = -0.5;
+            this.mesh.position.y-=1
+        }
         
         this.mesh.rotation.z = pi/2;
 
@@ -255,17 +268,25 @@ class HealthBar {
     }
 
     whenHit(damage) {
+        this.remainingLife-=damage
+        //remaining:full health = scaling : 1 (full bar)
+        //scaling=remaining/full Health
+        console.log(this.remainingLife/this.startLife)
+        this.mesh.scaling.y = this.remainingLife/this.startLife;
 
-        //damage:full health = x : 1 (full bar)
-        //x=damage/full Health
-        this.mesh.scaling.y -= damage/this.life;
 
-        if (this.mesh.scaling.y > 0.5) {
+        if (this.mesh.scaling.y>this.greenThreshold) 
+            this.mesh.material.emissiveColor = new BABYLON.Color3(0, 0.8, 0);
+        
+        else if (this.mesh.scaling.y>this.yellowThreshold) 
             this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0.8, 0);
-        } else if (this.mesh.scaling.y > 0.3) {
+        
+        else if (this.mesh.scaling.y > this.redThreshold) 
             this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
-        } else {
+        
+        else if (this.mesh.scaling.y <= 0){
             this.mesh.dispose();
         }
+
     }
 }

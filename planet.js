@@ -20,7 +20,7 @@ var pi=Math.PI;
 
 //gameplay stats
 var PLAYERMOVE = false;
-var DEBUG = true;
+var DEBUG = false;
 
 //player stats
 var playerWidth = 0.75;
@@ -32,7 +32,6 @@ var rotationSpeed = Math.PI / 150;
 
 var bulletRange = 15000;
 var bulletSpeed = Math.PI / 100;
-bulletSpeed /= 3;
 var bulletHeight = 1;
 var bulletCount = 1;
 var bulletAngleOffset = pi/12;
@@ -42,26 +41,33 @@ var bulletHorizOffset = 0.5;
 var playerLife=100
 
 //enemy stats
+var numEnemies=1
+//not used
 var enemyShooterType=1
 var enemyWalkerType=2
 
 //other stats
 var planetDiameter = 6;
 var planetRadius = planetDiameter/2;
+
 //assets
 const assets = {
     assetMeshes : new Map(),
 }
 
+var playerAsset=[]
+
 //assets needed later
 const assetsPath = [
     "rocketTest.babylon",
-    "grass.babylon"
+    
+    "grass2.babylon",
+    "enemy.babylon",
+    "grass.babylon",
 ]
 
-//assets to be used immediately
-const immAssetsPath = [
-    "grass.babylon",
+const playerPath = [
+    "playerTest.babylon",
 ]
 
 //data
@@ -113,6 +119,24 @@ function randomPos(radius){
         z = (z * radius);
     }
     return new BABYLON.Vector3(x,y,z);
+}
+
+//
+function getPointNearPosition(p0,range){
+    //random positive or negative
+    var ranPos=Math.round(Math.random()) ? 1 : -1;
+    var x=p0.x +(Math.random()*range*ranPos)
+    var y=p0.y +(Math.random()*range*ranPos)
+    var z=p0.z +(Math.random()*range*ranPos)
+
+    var pos=new BABYLON.Vector3(x,y,z)
+    var dir=pos
+    dir.normalize()
+    var ret=dir.scale(planetRadius)
+    //check if point is on surface
+    //console.log((ret.x*ret.x +ret.y*ret.y +ret.z*ret.z)==planetRadius*planetRadius)
+    return ret
+
 }
 
 //orient object in right direction
@@ -204,7 +228,8 @@ function bulletGen(mesh,bulletCount=1,shooter=null,ground,
 
 //rotate obj from A to B
 function rotateTowards(obj,A,B){
-    var direction = B.position.subtract(A.position);
+    //var direction = B.getAbsolutePosition().subtract(A.getAbsolutePosition());
+    var direction=B.subtract(A);
     obj.rotation = direction;
 
     //const target = enemyDir;
@@ -214,18 +239,103 @@ function rotateTowards(obj,A,B){
 
 function createEnemies(light){   
     //CREATE ENEMIES
-    var mesh = BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
+    //var mesh = BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
+
     //mesh.visibility=0.5
-    mesh.setEnabled(false);
-    var numEnemies=1
+    var mesh=assets.assetMeshes.get("enemy.babylon");
+    mesh.scaling=new BABYLON.Vector3(0.4,0.4,0.4)
+    console.log(mesh.material)
+
+    
     for(var i=0;i<numEnemies;i++) {
         var position=randomPos(planetRadius)
         var enemyBullet=assets.assetMeshes.get("rocketTest.babylon");
-        var enemy=new Enemy(mesh,ground,player,enemyBullet,enemyShooterType,DEBUG,scene)
+        //taret is player with some randomness
+        var target=player
+        var enemy=new Enemy(mesh,ground,target,enemyBullet,enemyShooterType,DEBUG,scene)
         enemy.spawn(position, light);
+        enemy.enemy.locallyTranslate(new BABYLON.Vector3(0, 0.5, 0))
         enemies.push(enemy)
     }
 }
+
+
+//to stop animation scene.stopAnimation(newMeshes[0])
+function walk(side="right",direction){
+    var frameRate=60
+    var speed=4
+    var step=frameRate/speed
+    var lowerLeg;
+    var upperLeg;
+    if(side=="right" || side=="R"){
+        lowerLeg=playerAsset[4]
+        upperLeg=playerAsset[2]
+    }
+    else {
+        lowerLeg=playerAsset[5]
+        upperLeg=playerAsset[3]
+    }
+    var currentRot=lowerLeg.rotation.x
+    
+    var walkLower = new BABYLON.Animation("walkDown", "rotation.x",
+     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    var keyFrames = []; 
+
+    keyFrames.push({
+        frame: 0,
+        value: currentRot
+    });
+
+    keyFrames.push({
+        frame: step,
+        value: currentRot-(pi/4*direction)
+    });
+    
+    keyFrames.push({
+        frame: step*2,
+        value: currentRot+(pi/2*direction)
+    });
+    
+    keyFrames.push({
+        frame: 3 * step,
+        value: currentRot
+    });
+
+    walkLower.setKeys(keyFrames);
+    scene.beginDirectAnimation(lowerLeg, [walkLower], 0,  keyFrames.length*step, true);
+    
+    
+    var walkUpper = new BABYLON.Animation("walkUp", "rotation.x", 
+        frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+    var keyFrames = []; 
+    var currentRot=upperLeg.rotation.x
+    keyFrames.push({
+        frame: 0,
+        value: currentRot
+    });
+
+    keyFrames.push({
+        frame: step,
+        value: currentRot+(pi/6*direction)
+    });
+    
+    keyFrames.push({
+        frame: step*2,
+        value: currentRot-(pi/2*direction)
+    });
+    
+    keyFrames.push({
+        frame: 3 * step,
+        value: currentRot
+    });
+
+    walkUpper.setKeys(keyFrames);
+
+    
+    scene.beginDirectAnimation(upperLeg, [walkUpper], 0,  keyFrames.length* step, true);
+    
+}
+
 
 function endLevel() {
     console.log("endLevel called");
@@ -249,19 +359,16 @@ camera.attachControl();
 var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 light.intensity = 0.7;
 
-//Creating the (temporary) player
-player = BABYLON.MeshBuilder.CreateBox("player", { size: 1, width: playerWidth,segments: 32 }, scene);
+
+
+
+player=playerAsset[1]
+
+player.position.z = -planetDiameter / 2;
 var playerPivot = new BABYLON.TransformNode("root");
-player.setParent(playerPivot);
-if (PLAYERMOVE) camera.parent = playerPivot;
+player.parent=playerPivot
+//playerPivot.rotate(BABYLON.Axis.X,-pi/2,BABYLON.Space.LOCAL)
 
-var wheelR = BABYLON.MeshBuilder.CreateBox("playerWheelR", {size: 0.8, width: wheelWidth }, scene);
-wheelR.parent = player;
-wheelR.position.x = playerWidth/2 + wheelWidth/2;
-
-var wheelL = BABYLON.MeshBuilder.CreateBox("playerWheelL", {size: 0.8,width: wheelWidth  }, scene);
-wheelL.parent = player;
-wheelL.position.x = -(playerWidth/2 + wheelWidth/2);
 
 //creating the planet
 ground = BABYLON.MeshBuilder.CreateSphere("ground", { diameter: planetDiameter, segments: 32 }, scene);
@@ -272,17 +379,26 @@ grassTexture.vScale = 10;
 planetMaterial.diffuseTexture = grassTexture;
 ground.material = planetMaterial;
 
-player.scaling = new BABYLON.Vector3(0.4,0.4,0.4);
-// to avoid that the scaling influences also its children (i.e. the health bar)
-player.bakeCurrentTransformIntoVertices();
-player.position.z = -planetDiameter / 2;
 
+
+// to avoid that the scaling influences also its children (i.e. the health bar)
+//player.bakeCurrentTransformIntoVertices();
+//player.position.z = -planetDiameter / 2;
+//console.log(player.getAbsolutePosition())
+
+
+//this is useful to see which player asset correspond to what
+/*
+scene.registerBeforeRender(function () {
+    //playerAsset[0].rotation.z+=0.01
+})
+*/
 
 //some debug utilities
 if (DEBUG) {
     //ground.showBoundingBox = true
     ground.visibility = 0.3;
-    player.visibility = 0.8;
+    //player.visibility = 0.8;
 }
 
 
@@ -311,12 +427,14 @@ let nextBulletTime = new Date().getTime();
 // do the following every time before rendering a frame
 
 var positionUpdated=false
+var rotatingLeft=false
+var rotatingLeft=false
 
 scene.onBeforeRenderObservable.add(() => {
 
 if (inputMap["w"] || inputMap["ArrowUp"]) {
-    wheelR.rotation.x += 0.05;
-    wheelL.rotation.x += 0.05;
+    //wheelR.rotation.x += 0.05;
+    //wheelL.rotation.x += 0.05;
     var forward = new BABYLON.Vector3(1, 0, 0);		
     var dir = player.getDirection(forward);
     dir.normalize();
@@ -326,14 +444,17 @@ if (inputMap["w"] || inputMap["ArrowUp"]) {
     positionUpdated=true
 }
 if (inputMap["a"] || inputMap["ArrowLeft"]) {
-    wheelR.rotation.x += 0.05;
-    wheelL.rotation.x -= 0.05;
+    //wheelR.rotation.x += 0.05;
+    //wheelL.rotation.x -= 0.05;
     player.rotation.z += rotationSpeed;
-
+    if(!rotatingLeft) {
+        walk("R",1)
+        rotatingLeft=true
+    }    
 }
 if (inputMap["s"] || inputMap["ArrowDown"]) {
-    wheelR.rotation.x -= 0.05;
-    wheelL.rotation.x -= 0.05;
+    //wheelR.rotation.x -= 0.05;
+    //wheelL.rotation.x -= 0.05;
 
     var forward = new BABYLON.Vector3(1, 0, 0);		
     var dir = player.getDirection(forward);
@@ -345,11 +466,16 @@ if (inputMap["s"] || inputMap["ArrowDown"]) {
     
 }
 if (inputMap["d"] || inputMap["ArrowRight"]) {
-    wheelR.rotation.x -= 0.05;
-    wheelL.rotation.x += 0.05;
+    //wheelR.rotation.x -= 0.05;
+    //wheelL.rotation.x += 0.05;
     player.rotation.z -= rotationSpeed;
     
 }
+
+//try to stop animation when button not pressed
+else if(!(inputMap["a"] || inputMap["d"]))
+    for(var i=0;i<playerAsset.length;i++)
+        scene.stopAnimation(playerAsset[i])
 
 //shoot
 const currentTime = new Date().getTime();
@@ -424,13 +550,13 @@ for (var idx = 0; idx < bullets.length; idx++) {
 //Move enemies
 scene.registerBeforeRender(function () {   
     for (var idx = 0; idx < enemies.length; idx++) {
+        
         enemies[idx].moveStep()
         if(positionUpdated) {
-            positionUpdated=false
             enemies[idx].updatePosition()
         }
-        //
     }
+    positionUpdated=false
 })
 
 }//END MAIN
@@ -440,10 +566,11 @@ var createScene = function () {
 
 console.log("starting");
 scene = new BABYLON.Scene(engine);
+//scene.debugLayer.show();
 scene.collisionsEnabled = true;
 //arc rotate camera is a type of camera that orbit the target.
 console.log("Loading assets...");
-console.log(assets);
+//console.log(assets);
 
 var assetsManager = new BABYLON.AssetsManager(scene);
 
@@ -458,8 +585,30 @@ assetsPath.forEach(asset => {
     meshTask.onSuccess = (task) => {
         // disable the original mesh and store it in the data structure
         console.log('loaded and stored '+asset);
+        //for is needed if multiple meshes in same object 
         task.loadedMeshes[0].setEnabled(false);
         assets.assetMeshes.set(asset, task.loadedMeshes[0]);
+    }
+    meshTask.onError = function (task, message, exception) {
+        console.log(message, exception);
+    }
+});
+
+playerPath.forEach(asset => {
+    
+    const name='load '+asset;
+    const path='./';
+    const meshTask = assetsManager.addMeshTask(name, "", path, asset);
+    console.log("loading : "+ asset);
+    
+    meshTask.onSuccess = (task) => {
+        // disable the original mesh and store it in the data structure
+        console.log('loaded and stored '+asset);
+        //for is needed if multiple meshes in same object 
+        for(var i=0; i< task.loadedMeshes.length; i++) {
+            //task.loadedMeshes[i].setEnabled(false);
+            playerAsset.push(task.loadedMeshes[i]);
+        }
     }
     meshTask.onError = function (task, message, exception) {
         console.log(message, exception);
