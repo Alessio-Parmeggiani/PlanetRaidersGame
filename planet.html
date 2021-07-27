@@ -5,6 +5,7 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@1,800" rel="stylesheet"> 
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400" rel="stylesheet"> 
         <link rel="stylesheet" href="victory.css">
@@ -30,16 +31,41 @@
         <canvas id="renderCanvas"></canvas>
         <script src="actors.js" ></script>
         <script src="planet.js" ></script>
-        <div id="congrats">Congratulations!</div>
-        <div id="message">You beat all the enemies</div>
-        <div id="upgrade">Choose your upgrade</div>
-        <div id="container">
-            <button><span>Player speed up</span></button>
-            <button><span>Bullets +1</span></button>
-            <button><span>Arc bullets</span></button>
-            <button><span>Bullets speed up</span></button>
-            <button><span>Bullets range up</span></button>
-            <button><span>Rotation speed up</span></button>
+        <div class="hidden" id="congrats">Congratulations!</div>
+        <div class="hidden" id="message">You beat all the enemies</div>
+        <div class="hidden" id="upgrade">Choose your upgrade</div>
+        <div class="hidden" id="container">
+            <button>
+                <img class="icon" src="icons/Speed up.png">
+                <span>Player speed up</span>
+            </button>
+            <button>
+                <img class="icon" src="icons/Bullets +1.png">
+                <span>Bullets +1</span>
+            </button>
+            <button>
+                <img class="icon" src="icons/Arc bullets.png">
+                <span>Arc bullets</span>
+            </button>
+            <button>
+                <img class="icon" src="icons/Bullets speed up.png">
+                <span>Bullets speed up</span>
+            </button>
+            <button>
+                <img class="icon" src="icons/Range up.png">
+                <span>Bullets range up</span>
+            </button>
+            <button>
+                <img class="icon" src="icons/Health up.png">
+                <span>Health up</span>
+            </button>
+        </div>
+        <div id="health">
+            <span id="healthText">Health</span>
+            <div id="bar">
+                <img id="heart" src="icons/heart.png">
+                <div id="playerHealth"></div>
+            </div>
         </div>
     </body>
 </html>
