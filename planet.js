@@ -20,7 +20,7 @@ var pi=Math.PI;
 
 //gameplay stats
 var PLAYERMOVE = false;
-var DEBUG = false;
+var DEBUG = true;
 
 //player stats
 var playerWidth = 0.75;
@@ -67,7 +67,7 @@ const assetsPath = [
 ]
 
 const playerPath = [
-    "playerTest.babylon",
+    "playerTest2.babylon",
 ]
 
 //data
@@ -119,6 +119,20 @@ function randomPos(radius){
         z = (z * radius);
     }
     return new BABYLON.Vector3(x,y,z);
+}
+
+function explode(emitter) {
+        BABYLON.ParticleHelper.CreateAsync("explosion", scene).then((set) => {
+            set.systems.forEach(s => {
+                s.minSize=0.01
+                s.maxSize=0.05
+                s.disposeOnStop = true;
+                //console.log(s)
+            });
+            set.start(emitter);
+            
+        });
+        
 }
 
 //
@@ -244,6 +258,7 @@ function createEnemies(light){
     //mesh.visibility=0.5
     var mesh=assets.assetMeshes.get("enemy.babylon");
     mesh.scaling=new BABYLON.Vector3(0.4,0.4,0.4)
+    mesh.material.subMaterials[5].alpha=0.1
     console.log(mesh.material)
 
     
@@ -362,8 +377,9 @@ light.intensity = 0.7;
 
 
 
-player=playerAsset[1]
-
+player=playerAsset[2]
+//player.rotation.x-=pi/2
+//player.rotation.z+=pi
 player.position.z = -planetDiameter / 2;
 var playerPivot = new BABYLON.TransformNode("root");
 player.parent=playerPivot
@@ -409,7 +425,7 @@ createEnemies(light);
 
 // ------------ SHOW UI -----------------
 
-var playerHealth = new HealthBar(player, light, scene, false);
+//var playerHealth = new HealthBar(player, light, scene, false);
 
 //------------INPUT READING--------------
 
@@ -448,7 +464,7 @@ if (inputMap["a"] || inputMap["ArrowLeft"]) {
     //wheelL.rotation.x -= 0.05;
     player.rotation.z += rotationSpeed;
     if(!rotatingLeft) {
-        walk("R",1)
+        //walk("R",1)
         rotatingLeft=true
     }    
 }
@@ -489,6 +505,7 @@ if (inputMap["h"] && currentTime > nextBulletTime) {
     // bullets is all existing bullets, projectiles is the bullets fired at once
     for (var pr=0; pr<projectiles.length;pr++) bullets.push(projectiles[pr]);
     nextBulletTime = new Date().getTime() + attackSpeed;
+    
 }
 })
 //END OnBeforeRenderObservable i.e. input reading//
@@ -519,6 +536,8 @@ for (var idx = 0; idx < bullets.length; idx++) {
     collidingObjects.forEach(objects => {
         for( var i=0; i<objects.length;i++){
             if (bulletMesh.intersectsMesh(objects[i], false)){
+                
+                
                 bulletMesh.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
                 objects[i].dispose();
                 objects.splice(i,1);  
@@ -532,6 +551,9 @@ for (var idx = 0; idx < bullets.length; idx++) {
                 console.log("enemy hit");
                 dead=enemies[j].whenHit(bullet.damage);
                 if (dead) enemies.splice(j, 1);
+
+                //explode(enemies[j])
+
                 bulletMesh.dispose();
                 pivot.dispose();
                 bullets.splice(idx, 1);
