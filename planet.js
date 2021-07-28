@@ -20,7 +20,7 @@ var pi=Math.PI;
 
 //gameplay stats
 var PLAYERMOVE = false;
-var DEBUG = false;
+var DEBUG = true;
 
 //player stats
 var playerWidth = 0.75;
@@ -41,7 +41,8 @@ var bulletHorizOffset = 0.5;
 var playerLife=100
 
 //enemy stats
-var numEnemies=1
+var numEnemies=5
+var remainingEnemies=numEnemies
 //not used
 var enemyShooterType=1
 var enemyWalkerType=2
@@ -60,7 +61,7 @@ var playerAsset=[]
 //assets needed later
 const assetsPath = [
     "rocketTest.babylon",
-    
+    "rocket.babylon", 
     "grass2.babylon",
     "enemy.babylon",
     "grass.babylon",
@@ -371,13 +372,20 @@ var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, 1.2, 10, new BABY
 //mainly for debug, control rotation of camera with mouse
 camera.attachControl();
 
-var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+//var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-1, -1, 1), scene);
 light.intensity = 0.8;
 
 
 
 
 player=playerAsset[2]
+
+var forward = new BABYLON.Vector3(1, 0, 0);		
+var dir = player.getDirection(forward);
+dir.normalize();
+
+
 //player.rotation.x-=pi/2
 //player.rotation.z+=pi
 player.position.z = -planetDiameter / 2;
@@ -386,10 +394,16 @@ player.parent=playerPivot
 //playerPivot.rotate(BABYLON.Axis.X,-pi/2,BABYLON.Space.LOCAL)
 
 
+var spotLight = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(0,0, -planetRadius), 
+    new BABYLON.Vector3(0,0.5,1), Math.PI/4 , 20, scene);
+    spotLight.diffuse = new BABYLON.Color3(1, 1, 0);
+    spotLight.intensity=0.5
+spotLight.parent=player
+
 //creating the planet
 ground = BABYLON.MeshBuilder.CreateSphere("ground", { diameter: planetDiameter, segments: 32 }, scene);
 var planetMaterial = new BABYLON.StandardMaterial("planetMat", scene);
-var grassTexture = new BABYLON.Texture("grass.jpg", scene);
+var grassTexture = new BABYLON.Texture("texture/grass.jpg", scene);
 grassTexture.uScale = 20;
 grassTexture.vScale = 10;
 planetMaterial.diffuseTexture = grassTexture;
@@ -435,8 +449,8 @@ scene.registerBeforeRender(function () {
 //some debug utilities
 if (DEBUG) {
     //ground.showBoundingBox = true
-    ground.visibility = 0.3;
-    //player.visibility = 0.8;
+    //ground.visibility = 0.3;
+    player.visibility = 0.8;
 }
 
 
@@ -521,7 +535,7 @@ if (inputMap["h"] && currentTime > nextBulletTime) {
     
     //avoid singular case
     if (player.rotation.z == 0) player.rotation.z += 0.001;
-    var mesh=assets.assetMeshes.get("rocketTest.babylon");
+    var mesh=assets.assetMeshes.get("rocket.babylon");
     var projectiles=bulletGen(mesh,bulletCount,player,ground,
         "parallel",bulletAngleOffset,bulletHorizOffset,scene)
     // bullets is all existing bullets, projectiles is the bullets fired at once
@@ -534,7 +548,7 @@ if (inputMap["h"] && currentTime > nextBulletTime) {
 
 //compute bullet position and collision
 scene.registerBeforeRender(function () {
-//with no bullet array is empty
+
 for (var idx = 0; idx < bullets.length; idx++) {
 
     var bullet = bullets[idx];
@@ -542,8 +556,9 @@ for (var idx = 0; idx < bullets.length; idx++) {
     var bulletMesh=bullet.bullet
     bullet.move()
 
-    
-    var bulletFall = BABYLON.Vector3.Distance(bulletMesh.position,ground.position) < planetDiameter/2;
+    var bulletHeight=BABYLON.Vector3.Distance(bulletMesh.getAbsolutePosition(),ground.position)
+    var bulletFall=false;
+    if(bulletHeight<=planetRadius+bulletMesh.getBoundingInfo().boundingBox.extendSize.x) bulletFall=true  ;
     //bulletFall=false
     //collision with ground
     
@@ -572,7 +587,10 @@ for (var idx = 0; idx < bullets.length; idx++) {
             if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
                 console.log("enemy hit");
                 dead=enemies[j].whenHit(bullet.damage);
-                if (dead) enemies.splice(j, 1);
+                if (dead) {
+                    enemies.splice(j, 1);
+                    remainingEnemies=enemies.length
+                }
 
                 //explode(enemies[j])
 
@@ -622,7 +640,7 @@ var assetsManager = new BABYLON.AssetsManager(scene);
 assetsPath.forEach(asset => {
     
     const name='load '+asset;
-    const path='./';
+    const path='./asset/';
     const meshTask = assetsManager.addMeshTask(name, "", path, asset);
     console.log("loading : "+ asset);
     
@@ -641,7 +659,7 @@ assetsPath.forEach(asset => {
 playerPath.forEach(asset => {
     
     const name='load '+asset;
-    const path='./';
+    const path='./asset/';
     const meshTask = assetsManager.addMeshTask(name, "", path, asset);
     console.log("loading : "+ asset);
     

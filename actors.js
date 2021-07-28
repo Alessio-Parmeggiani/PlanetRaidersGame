@@ -13,7 +13,7 @@ class Enemy{
 
         //movement
         this.nextEnemyMoveTime=new Date().getTime();
-
+        this.nextUpdateTargetTime=new Date().getTime();
         //distance to move before stopping
         this.maxdistanceMoved=Math.PI/4
 
@@ -22,6 +22,9 @@ class Enemy{
 
         //how much to wait before moving again, if 0 continue movement
         this.moveInterval=5 //ms
+        //how much to wait before updating the target to another point near player
+        this.updateTargetInterval=100
+
 
         //distance traveled in this step
         this.distanceStepMoved=0
@@ -42,6 +45,7 @@ class Enemy{
 
         this.DEBUG=DEBUG
 
+       
         // to change its color when hit
         //this.mesh.material = new BABYLON.StandardMaterial("matEnemy", scene);
         //this.mesh.material.diffuse = new BABYLON.Color3(1, 1, 1);
@@ -101,26 +105,41 @@ class Enemy{
             this.nextEnemyMoveTime = new Date().getTime() + this.moveInterval;
             this.distanceStepMoved=0    
         }
+        /*
+        //i don't know if this should be used
+        if(currentTime>this.nextUpdateTargetTime) {
+            this.updatePosition();
+            this.nextUpdateTargetTime = new Date().getTime() + this.updateTargetInterval;
+        }
+        */
     }
 
     updatePosition(){
-        console.log("changing direction")
+        //console.log("changing direction")
         //every step it should update the direction
-        this.enemyPivot.setParent(null)
-        this.enemy.setParent(null)
-       
-        this.enemyPivot.rotation = BABYLON.Vector3.Zero()
-        //da fare animato magari
 
-        //new target da scegliere ogni tot secondi
-        var newTarget=getPointNearPosition(this.target.getAbsolutePosition(),1)
-        rotateTowards(this.enemyPivot,this.enemy.getAbsolutePosition(),newTarget)
+        //new target to choose every x seconds
+        const currentTime = new Date().getTime();
+        if(currentTime>this.nextUpdateTargetTime) {
+            console.log("changing direction")
+            this.enemyPivot.setParent(null)
+            this.enemy.setParent(null)
+           
+            this.enemyPivot.rotation = BABYLON.Vector3.Zero()    
 
-        if(this.enemy.getAbsolutePosition().x>0) this.direction=-1
-        else this.direction=1
+            //new target
+            var newTarget=getPointNearPosition(this.target.getAbsolutePosition(),0.2*remainingEnemies)
+            rotateTowards(this.enemyPivot,this.enemy.getAbsolutePosition(),newTarget)
+    
+            if(this.enemy.getAbsolutePosition().x>0) this.direction=-1
+            else this.direction=1
+    
+            this.enemy.setParent(this.enemyPivot)
+            this.enemyPivot.setParent(this.planet)
+            
+            this.nextUpdateTargetTime = new Date().getTime() + this.updateTargetInterval;
+        }
 
-        this.enemy.setParent(this.enemyPivot)
-        this.enemyPivot.setParent(this.planet)
     }
 
 
@@ -166,9 +185,9 @@ class Bullet{
         this.bulletHorizOffset = 0.5;
 
         this.bulletSpeed = Math.PI / 300;
-        this.bulletHeight = 1;
+        this.bulletHeight = 0.3;
 
-        this.bulletRange = 150;
+        this.bulletRange = 1000;
 
         this.damage=1;
 
@@ -180,12 +199,19 @@ class Bullet{
     setRange(range) {
         this.bulletRange=range
     }*/
+    getRangeFromNTurns(N) {
+        var s=this.bulletSpeed
+        var hi=this.bulletHeight
+        var range= (-hi*s)/ (2*Math.PI *N)
+        
+        return range
+    }
     spawn(dir){
         const currentTime = new Date().getTime();
     
         //get width of bullet
         var mesh=this.mesh
-        
+       
     
         bulletHorizOffset = mesh.getBoundingInfo().boundingBox.extendSize.x;
     
@@ -196,7 +222,7 @@ class Bullet{
         //get instance from pre-loaded model
     
         this.bullet = mesh.createInstance();
-        this.bullet.scaling = new BABYLON.Vector3(0.15,0.15,0.15);
+        //this.bullet.scaling = new BABYLON.Vector3(0.15,0.15,0.15);
         var shooterPos = this.shooter.getAbsolutePosition();
         this.bullet.position = shooterPos;
     
@@ -214,15 +240,20 @@ class Bullet{
         //slightly higher in order to not collide with ground immediately
         this.bullet.locallyTranslate(new BABYLON.Vector3(0, 0, -this.bulletHeight));
         //little forward w.r.t shooter
-        this.bullet.locallyTranslate(new BABYLON.Vector3(0, 1.5, 0));
+        this.bullet.locallyTranslate(new BABYLON.Vector3(0, 0.5, 0));
     
         //this.bullet.material = new BABYLON.StandardMaterial("bulletmat", scene);
         this.bullet.checkCollisions = true;    
+
+        this.bulletRange=this.getRangeFromNTurns(1.25)
+        //this.bullet.showBoundingBox=true
     
     }
 
     move() {
-        this.bullet.locallyTranslate(new BABYLON.Vector3(0, 0, 1/this.bulletRange));
+        this.bullet.rotation.y+=0.1
+        //this.bullet.locallyTranslate(new BABYLON.Vector3(0, 0, 1/this.bulletRange));
+        this.bullet.position.z-=this.bulletRange
         this.pivot.rotate(this.axis, this.bulletSpeed * this.direction, BABYLON.Space.LOCAL);
     }
 }
