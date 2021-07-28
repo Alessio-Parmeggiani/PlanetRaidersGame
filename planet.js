@@ -259,7 +259,7 @@ function createEnemies(light){
     //mesh.visibility=0.5
     var mesh=assets.assetMeshes.get("enemy.babylon");
     mesh.scaling=new BABYLON.Vector3(0.4,0.4,0.4)
-    mesh.material.subMaterials[5].alpha=0.1
+    //mesh.material.subMaterials[5].alpha=0.1
     console.log(mesh.material)
 
     
