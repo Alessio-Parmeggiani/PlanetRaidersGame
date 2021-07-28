@@ -20,7 +20,7 @@ var pi=Math.PI;
 
 //gameplay stats
 var PLAYERMOVE = false;
-var DEBUG = true;
+var DEBUG = false;
 
 //player stats
 var playerWidth = 0.75;
@@ -372,7 +372,7 @@ var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, 1.2, 10, new BABY
 camera.attachControl();
 
 var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-light.intensity = 0.7;
+light.intensity = 0.8;
 
 
 
@@ -405,10 +405,32 @@ ground.material = planetMaterial;
 
 //this is useful to see which player asset correspond to what
 /*
+0: lower body           /
+1: front left joint 1   Y
+2: upper body           Z
+3: cannon               Z
+4: front left joint 2   Z
+5: front left joint 3   Z
+
+6: front right joint 1  Y
+7: rear left joint 1    Y
+8: rear right joint 1   Y
+
+9: front right joint 2  Z
+10: rear left joint 2   Z
+11: rear right joint 2  Z
+
+12: front right joint 3 Z
+13: rear left joint 3   Z
+14: rear right joint 3  Z
+
+*/
+/*
 scene.registerBeforeRender(function () {
-    //playerAsset[0].rotation.z+=0.01
+    playerAsset[14].rotation.z+=0.01
 })
 */
+
 
 //some debug utilities
 if (DEBUG) {
