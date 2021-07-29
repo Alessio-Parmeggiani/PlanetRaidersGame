@@ -19,6 +19,7 @@ class Enemy{
 
         //how much to move per frame
         this.velocity=Math.PI/200
+        this.velocity=0
 
         //how much to wait before moving again, if 0 continue movement
         this.moveInterval=5 //ms
@@ -185,11 +186,14 @@ class Bullet{
         this.bulletHorizOffset = 0.5;
 
         this.bulletSpeed = Math.PI / 300;
+        
         this.bulletHeight = 0.3;
 
         this.bulletRange = 1000;
 
         this.damage=1;
+
+        this.bulletSize=0
 
         
     }/*
@@ -206,14 +210,60 @@ class Bullet{
         
         return range
     }
+    createParticles() {
+        
+        var particles= new BABYLON.ParticleSystem("particles", 500);
+        particles.particleTexture = new BABYLON.Texture("texture/flare.png");
+        particles.emitter= this.bullet
+        
+        //console.log(mesh.getBoundingInfo().boundingBox.extendSize)
+        //particles.worldOffset=new BABYLON.Vector3(0, -mesh.getBoundingInfo().boundingBox.extendSize.y,0);
+        var direction1=new BABYLON.Vector3(0, -10,0)
+        var direction2=new BABYLON.Vector3(0, -5, 0)
+        //particles.createPointEmitter(direction1, direction2);
+        var maxEmitBox=new BABYLON.Vector3(0.1, 0.1, 0)
+        var minEmitBox=new BABYLON.Vector3(-0.1, -0.1, 0)
+        particles.createBoxEmitter(direction1,direction2,minEmitBox,maxEmitBox)
+        
+        
+        particles.color1=new BABYLON.Color3(1,0,0)
+        particles.color2=new BABYLON.Color3(0.5,0.5,0)
+        particles.colorDead=new BABYLON.Color3(0.1,0.1,0.1)
+
+        particles.minLifeTime = 0.05;
+        particles.maxLifeTime = 0.1;
+
+        particles.minSize=0.05
+        particles.maxSize=0.2
+
+        particles.emitRate = 300;
+        //particles.direction1=direction1
+        //particles.direction2 =direction2
+        console.log(particles)
+        //particles.isLocal = true;
+
+
+        particles.startPositionFunction = (worldMatrix, positionToUpdate, particle, isLocal) => {
+            var randX = BABYLON.Scalar.RandomRange(minEmitBox.x, maxEmitBox.x);
+            var randY = BABYLON.Scalar.RandomRange(minEmitBox.y, maxEmitBox.y);
+            randY-=this.bulletSize.y
+            var randZ = BABYLON.Scalar.RandomRange(minEmitBox.z, maxEmitBox.z);
+            BABYLON.Vector3.TransformCoordinatesFromFloatsToRef(randX, randY, randZ, worldMatrix, positionToUpdate);
+          };
+
+        
+        particles.start();
+
+
+    }
     spawn(dir){
         const currentTime = new Date().getTime();
     
         //get width of bullet
         var mesh=this.mesh
        
-    
-        bulletHorizOffset = mesh.getBoundingInfo().boundingBox.extendSize.x;
+        this.bulletSize=mesh.getBoundingInfo().boundingBox.extendSize
+        bulletHorizOffset = this.bulletSize.x;
     
         var dir;
         
@@ -246,7 +296,8 @@ class Bullet{
         this.bullet.checkCollisions = true;    
 
         this.bulletRange=this.getRangeFromNTurns(1.25)
-        //this.bullet.showBoundingBox=true
+        this.createParticles()
+        
     
     }
 

@@ -41,7 +41,7 @@ var bulletHorizOffset = 0.5;
 var playerLife=100
 
 //enemy stats
-var numEnemies=5
+var numEnemies=0
 var remainingEnemies=numEnemies
 //not used
 var enemyShooterType=1
@@ -256,6 +256,76 @@ function rotateTowards(obj,A,B){
     obj.rotate(new BABYLON.Vector3(1, 0 ,0), Math.PI/2);
 }
 
+function spawningAnimation(position) {
+    var cylinder = BABYLON.MeshBuilder.CreateCylinder("spawnAnimation",{height: 1}, scene);
+    //var cylinder=assets.assetMeshes.get("teleport.babylon").createInstance();
+    
+    console.log(cylinder)
+    cylinder.position=position
+    //cylinder.scaling.y=0.08
+    //cylinder.rotation.z=Math.PI/4
+    //cylinder.visibility=0
+    
+    
+    orientSurface(cylinder,position,ground)
+    cylinder.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
+    var material = new BABYLON.StandardMaterial("mat", scene);
+    material.emissiveColor = new BABYLON.Color3(0.2, 0.6, 1);
+    material.diffuseTexture = new BABYLON.Texture("texture/effect.png", scene);
+    
+    //material.diffuseTexture.hasAlpha = true;
+    material.opacityTexture=new BABYLON.Texture("texture/blend.png", scene);
+    material.opacityTexture.wAng = -Math.PI/2; 
+    
+    cylinder.material=material
+
+    var ring1 = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.1,diameter:1.2},scene);
+    orientSurface(ring1,position,ground)
+    ring1.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
+    ring1.material=material
+   
+    scene.registerBeforeRender(function () {
+        ring1.rotation.y+=0.3
+        
+    })
+
+    var ring2 = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.1,diameter:1.2},scene);
+    orientSurface(ring2,position,ground)
+    ring2.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
+    ring2.material=material
+
+    scene.registerBeforeRender(function () {
+        ring2.rotation.x-=0.2
+    })
+
+    var frameRate=60
+    var anim1 = new BABYLON.Animation("rising", "visibility",
+     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    var keyFrames = []; 
+
+    keyFrames.push({
+        frame: 0,
+        value: 0
+    });
+
+    keyFrames.push({
+        frame: 60,
+        value: 1
+    });
+
+    keyFrames.push({
+        frame: 90,
+        value: 0
+    });
+
+    anim1.setKeys(keyFrames);
+    scene.beginDirectAnimation(cylinder, [anim1], 0,  180, true);
+    scene.beginDirectAnimation(ring1, [anim1], 0,  180, true);
+    scene.beginDirectAnimation(ring2, [anim1], 0,  180, true);
+    
+
+}
+
 function createEnemies(light){   
     //CREATE ENEMIES
     //var mesh = BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
@@ -270,6 +340,7 @@ function createEnemies(light){
     for(var i=0;i<numEnemies;i++) {
         var position=randomPos(planetRadius)
         var enemyBullet=assets.assetMeshes.get("rocketTest.babylon");
+        spawningAnimation(position)
         //taret is player with some randomness
         var target=player
         var enemy=new Enemy(mesh,ground,target,enemyBullet,enemyShooterType,DEBUG,scene)
@@ -280,83 +351,6 @@ function createEnemies(light){
 }
 
 
-//to stop animation scene.stopAnimation(newMeshes[0])
-/*
-function walk(side="right",direction){
-    var frameRate=60
-    var speed=4
-    var step=frameRate/speed
-    var lowerLeg;
-    var upperLeg;
-    if(side=="right" || side=="R"){
-        lowerLeg=playerAsset[4]
-        upperLeg=playerAsset[2]
-    }
-    else {
-        lowerLeg=playerAsset[5]
-        upperLeg=playerAsset[3]
-    }
-    var currentRot=lowerLeg.rotation.x
-    
-    var walkLower = new BABYLON.Animation("walkDown", "rotation.x",
-     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    var keyFrames = []; 
-
-    keyFrames.push({
-        frame: 0,
-        value: currentRot
-    });
-
-    keyFrames.push({
-        frame: step,
-        value: currentRot-(pi/4*direction)
-    });
-    
-    keyFrames.push({
-        frame: step*2,
-        value: currentRot+(pi/2*direction)
-    });
-    
-    keyFrames.push({
-        frame: 3 * step,
-        value: currentRot
-    });
-
-    walkLower.setKeys(keyFrames);
-    scene.beginDirectAnimation(lowerLeg, [walkLower], 0,  keyFrames.length*step, true);
-    
-    
-    var walkUpper = new BABYLON.Animation("walkUp", "rotation.x", 
-        frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    var keyFrames = []; 
-    var currentRot=upperLeg.rotation.x
-    keyFrames.push({
-        frame: 0,
-        value: currentRot
-    });
-
-    keyFrames.push({
-        frame: step,
-        value: currentRot+(pi/6*direction)
-    });
-    
-    keyFrames.push({
-        frame: step*2,
-        value: currentRot-(pi/2*direction)
-    });
-    
-    keyFrames.push({
-        frame: 3 * step,
-        value: currentRot
-    });
-
-    walkUpper.setKeys(keyFrames);
-
-    
-    scene.beginDirectAnimation(upperLeg, [walkUpper], 0,  keyFrames.length* step, true);
-    
-}
-*/
 
 
 function endLevel() {
@@ -414,6 +408,10 @@ var grassTexture = new BABYLON.Texture("texture/grass.jpg", scene);
 grassTexture.uScale = 20;
 grassTexture.vScale = 10;
 planetMaterial.diffuseTexture = grassTexture;
+planetMaterial.bumpTexture = new BABYLON.Texture("texture/bump2.png", scene);
+planetMaterial.bumpTexture.uScale=10
+planetMaterial.bumpTexture.vScale=10
+planetMaterial.bumpTexture.level=0.4
 ground.material = planetMaterial;
 
 
@@ -427,28 +425,28 @@ ground.material = planetMaterial;
 //this is useful to see which player asset correspond to what
 /*
 0: lower body           /
-1: front left joint 1   Y
+1: front left joint 1   Z
 2: upper body           Z
 3: cannon               Z
-4: front left joint 2   Z
-5: front left joint 3   Z
+4: front left joint 2   Y
+5: front left joint 3   Y
 
-6: front right joint 1  Y
-7: rear left joint 1    Y
-8: rear right joint 1   Y
+6: front right joint 1  Z
+7: rear left joint 1    Z
+8: rear right joint 1   Z
 
-9: front right joint 2  Z
-10: rear left joint 2   Z
-11: rear right joint 2  Z
+9: front right joint 2  Y
+10: rear left joint 2   Y
+11: rear right joint 2  Y
 
-12: front right joint 3 Z
-13: rear left joint 3   Z
-14: rear right joint 3  Z
+12: front right joint 3 Y
+13: rear left joint 3   Y
+14: rear right joint 3  Y
 
 */
 /*
 scene.registerBeforeRender(function () {
-    playerAsset[14].rotation.z+=0.01
+    playerAsset[2].rotation.z+=0.01
 })
 */
 
@@ -641,6 +639,7 @@ scene.registerBeforeRender(function () {
     for (var idx = 0; idx < enemies.length; idx++) {
         
         enemies[idx].moveStep()
+        positionUpdated=true
         if(positionUpdated) {
             enemies[idx].updatePosition()
         }

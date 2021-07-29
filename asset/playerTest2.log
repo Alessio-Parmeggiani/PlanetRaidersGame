@@ -1,0 +1,233 @@
+Exporter version: 2.93.2, Blender version: 2.93.1
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used :
+		Inline textures     :  false
+		Material Type       :  PBR
+		Positions Precision :  4
+		Normals Precision   :  3
+		UVs Precision       :  3
+		Vert Color Precision:  3
+		Mat Weight Precision:  2
+		Keep Z-up r-handed  :  no
+		Texture directory   :  C:\Users\alessio\Documents\GitHub\PlanetGame\asset\
+	Python World class constructor completed
+	WARNING: No active camera has been assigned, or is not in a currently enabled collection
+	processing begun of mesh:  LowBody
+		processing begun of material:  Material.004
+		processing begun of material:  WhiteMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#0
+		num positions      :  1088
+		num normals        :  1088
+		num tangents       :  0
+		num uvs            :  2176
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  508
+	processing begun of mesh:  Cylinder.001
+		processing begun of material:  RustyOrangeMetal
+		processing begun of material:  WhiteMetal
+		processing begun of material:  GreyMetal
+		registered as also a user of material:  WhiteMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#1
+		num positions      :  2294
+		num normals        :  2294
+		num tangents       :  0
+		num uvs            :  4588
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1116
+	processing begun of mesh:  UpperBody
+		processing begun of material:  BlueMetal
+		processing begun of material:  WhiteMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  WhiteMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#2
+		num positions      :  1202
+		num normals        :  1202
+		num tangents       :  0
+		num uvs            :  2404
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  516
+	processing begun of mesh:  Cannon
+		processing begun of material:  GreyMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  GreyMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#3
+		num positions      :  1483
+		num normals        :  1483
+		num tangents       :  0
+		num uvs            :  2966
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  652
+	processing begun of mesh:  Cylinder.002
+		processing begun of material:  BlueMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  BlueMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#4
+		num positions      :  2574
+		num normals        :  2574
+		num tangents       :  0
+		num uvs            :  5148
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1196
+	processing begun of mesh:  Cylinder.003
+		processing begun of material:  WhiteMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  WhiteMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#5
+		num positions      :  2726
+		num normals        :  2726
+		num tangents       :  0
+		num uvs            :  5452
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1225
+	processing begun of mesh:  Cylinder.004
+		processing begun of material:  RustyOrangeMetal
+		processing begun of material:  WhiteMetal
+		processing begun of material:  GreyMetal
+		registered as also a user of material:  RustyOrangeMetal
+		registered as also a user of material:  WhiteMetal
+		registered as also a user of material:  GreyMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#6
+		num positions      :  2290
+		num normals        :  2290
+		num tangents       :  0
+		num uvs            :  4580
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1116
+	processing begun of mesh:  Cylinder.005
+		processing begun of material:  RustyOrangeMetal
+		processing begun of material:  WhiteMetal
+		processing begun of material:  GreyMetal
+		registered as also a user of material:  RustyOrangeMetal
+		registered as also a user of material:  WhiteMetal
+		registered as also a user of material:  GreyMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#7
+		num positions      :  2396
+		num normals        :  2396
+		num tangents       :  0
+		num uvs            :  4792
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1116
+	processing begun of mesh:  Cylinder.006
+		processing begun of material:  RustyOrangeMetal
+		processing begun of material:  WhiteMetal
+		processing begun of material:  GreyMetal
+		registered as also a user of material:  RustyOrangeMetal
+		registered as also a user of material:  WhiteMetal
+		registered as also a user of material:  GreyMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#8
+		num positions      :  2373
+		num normals        :  2373
+		num tangents       :  0
+		num uvs            :  4746
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1116
+	processing begun of mesh:  Cylinder.007
+		processing begun of material:  BlueMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  BlueMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#9
+		num positions      :  2631
+		num normals        :  2631
+		num tangents       :  0
+		num uvs            :  5262
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1196
+	processing begun of mesh:  Cylinder.008
+		processing begun of material:  BlueMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  BlueMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#10
+		num positions      :  2621
+		num normals        :  2621
+		num tangents       :  0
+		num uvs            :  5242
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1196
+	processing begun of mesh:  Cylinder.009
+		processing begun of material:  BlueMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  BlueMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#11
+		num positions      :  2617
+		num normals        :  2617
+		num tangents       :  0
+		num uvs            :  5234
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1196
+	processing begun of mesh:  LegFrontR3
+		processing begun of material:  WhiteMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  WhiteMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#12
+		num positions      :  2732
+		num normals        :  2732
+		num tangents       :  0
+		num uvs            :  5464
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1225
+	processing begun of mesh:  Cylinder.011
+		processing begun of material:  WhiteMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  WhiteMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#13
+		num positions      :  2726
+		num normals        :  2726
+		num tangents       :  0
+		num uvs            :  5452
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1225
+	processing begun of mesh:  Cylinder.012
+		processing begun of material:  WhiteMetal
+		processing begun of material:  RustyOrangeMetal
+		registered as also a user of material:  WhiteMetal
+		registered as also a user of material:  RustyOrangeMetal
+		processing begun of multimaterial:  playerTest2.Multimaterial#14
+		num positions      :  2717
+		num normals        :  2717
+		num tangents       :  0
+		num uvs            :  5434
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  1225
+========= Writing of JSON file started =========
+	writing mesh:  LowBody
+	writing mesh:  Cylinder.001
+	writing mesh:  UpperBody
+	writing mesh:  Cannon
+	writing mesh:  Cylinder.002
+	writing mesh:  Cylinder.003
+	writing mesh:  Cylinder.004
+	writing mesh:  Cylinder.005
+	writing mesh:  Cylinder.006
+	writing mesh:  Cylinder.007
+	writing mesh:  Cylinder.008
+	writing mesh:  Cylinder.009
+	writing mesh:  LegFrontR3
+	writing mesh:  Cylinder.011
+	writing mesh:  Cylinder.012
+========= Writing of JSON file completed =========
+========= end of processing =========
+elapsed time:  0 min, 1.878 secs
