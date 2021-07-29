@@ -26,8 +26,8 @@ var DEBUG = true;
 var playerWidth = 0.75;
 var wheelWidth = 0.5;
 
-var attackSpeed = 300;
-var rotationSpeed = Math.PI / 150;
+var attackSpeed = 100;
+var rotationSpeed = Math.PI / 100;
 
 
 var bulletRange = 15000;
@@ -75,6 +75,10 @@ const playerPath = [
 var bullets = [];
 var collidingObjects = [];
 var enemies = [];
+
+// ---- Animations ----
+var animating = false;
+var animations = [];
 
 
 /*
@@ -277,6 +281,7 @@ function createEnemies(light){
 
 
 //to stop animation scene.stopAnimation(newMeshes[0])
+/*
 function walk(side="right",direction){
     var frameRate=60
     var speed=4
@@ -351,6 +356,7 @@ function walk(side="right",direction){
     scene.beginDirectAnimation(upperLeg, [walkUpper], 0,  keyFrames.length* step, true);
     
 }
+*/
 
 
 function endLevel() {
@@ -371,6 +377,7 @@ var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, 1.2, 10, new BABY
 
 //mainly for debug, control rotation of camera with mouse
 camera.attachControl();
+camera.wheelPrecision = 45;
 
 //var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-1, -1, 1), scene);
@@ -494,6 +501,8 @@ if (inputMap["w"] || inputMap["ArrowUp"]) {
     if (PLAYERMOVE) playerPivot.rotate(dir, Math.PI / 150, BABYLON.Space.WORLD);  // the player moves, the planet stays still
     else ground.rotate(dir, -Math.PI / 150, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
     positionUpdated=true
+
+    if (startAnimation(animating)) animating = true;
 }
 if (inputMap["a"] || inputMap["ArrowLeft"]) {
     //wheelR.rotation.x += 0.05;
@@ -502,7 +511,9 @@ if (inputMap["a"] || inputMap["ArrowLeft"]) {
     if(!rotatingLeft) {
         //walk("R",1)
         rotatingLeft=true
-    }    
+    }
+
+    if (startAnimation(animating)) animating = true;
 }
 if (inputMap["s"] || inputMap["ArrowDown"]) {
     //wheelR.rotation.x -= 0.05;
@@ -515,23 +526,39 @@ if (inputMap["s"] || inputMap["ArrowDown"]) {
     if (PLAYERMOVE) playerPivot.rotate(dir, -Math.PI / 150, BABYLON.Space.WORLD);
     else ground.rotate(dir, Math.PI / 150, BABYLON.Space.WORLD);
     positionUpdated=true
+
+    if (startAnimation(animating)) animating = true;
     
 }
 if (inputMap["d"] || inputMap["ArrowRight"]) {
     //wheelR.rotation.x -= 0.05;
     //wheelL.rotation.x += 0.05;
     player.rotation.z -= rotationSpeed;
-    
-}
 
-//try to stop animation when button not pressed
-else if(!(inputMap["a"] || inputMap["d"]))
-    for(var i=0;i<playerAsset.length;i++)
-        scene.stopAnimation(playerAsset[i])
+    if (startAnimation(animating)) animating = true;
+}
+if (!inputMap["w"] && !inputMap["ArrowUp"] &&
+    !inputMap["a"] && !inputMap["ArrowLeft"] &&
+    !inputMap["s"] && !inputMap["ArrowDown"] &&
+    !inputMap["d"] && !inputMap["ArrowRight"]) {
+        
+    if (animating) {
+        for (var i = 0; i < playerAsset.length; i++) {
+            animations[i].stop();
+            playerAsset[i].animations.length = 0;         
+        }
+        animations.length = 0;
+        stopAnimation();
+        for (var i = 0; i < playerAsset.length; i++) {
+            scene.beginAnimation(playerAsset[i], 0, frameRate/speed, false);
+        }
+    }
+    animating = false;
+}
 
 //shoot
 const currentTime = new Date().getTime();
-if (inputMap["h"] && currentTime > nextBulletTime) {
+if ((inputMap["h"] || inputMap["e"]) && currentTime > nextBulletTime) {
     
     //avoid singular case
     if (player.rotation.z == 0) player.rotation.z += 0.001;
