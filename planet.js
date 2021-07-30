@@ -78,11 +78,12 @@ var enemies = [];
 
 // ---- Animations ----
 var animating = false;
+var forward = true;
+var previous_forward = true;
 var animations = [];
 
-
-/*
 // ------- BUTTON MANAGER -------
+/*
 document.addEventListener("DOMContentLoaded", function(e) {
     var buttons = document.getElementsByTagName("button");
     var spans = document.getElementsByTagName("span");
@@ -100,6 +101,8 @@ document.addEventListener("DOMContentLoaded", function(e) {
     }
 });
 */
+
+//buttons = document.getElementsByTagName("div");
 
 //get a random position on surface of sphere
 function randomPos(radius){
@@ -350,16 +353,13 @@ function createEnemies(light){
     }
 }
 
-
-
-
 function endLevel() {
     console.log("endLevel called");
-   document.getElementById("congrats").classList.add("anim-first");
-   document.getElementById("message").classList.add("anim-first");
-   document.getElementById("container").classList.add("anim-container");
-   document.getElementById("upgrade").classList.add("anim-upgrade");
-   document.getElementById("renderCanvas").classList.add("anim-canvas");
+    document.getElementById("congrats").classList.add("anim-first");
+    document.getElementById("message").classList.add("anim-first");
+    document.getElementById("container").classList.add("anim-container");
+    document.getElementById("upgrade").classList.add("anim-upgrade");
+    document.getElementById("renderCanvas").classList.add("anim-canvas");
 }   
 
 //
@@ -500,7 +500,18 @@ if (inputMap["w"] || inputMap["ArrowUp"]) {
     else ground.rotate(dir, -Math.PI / 150, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
     positionUpdated=true
 
-    if (startAnimation(animating)) animating = true;
+    forward = true;
+
+    if (previous_forward != forward) {
+        if (animating) {
+            emptyAnimArray();
+            animating = false;
+        }
+    }
+    
+    if (startAnimation(animating, forward)) animating = true;
+
+    previous_forward = true;
 }
 if (inputMap["a"] || inputMap["ArrowLeft"]) {
     //wheelR.rotation.x += 0.05;
@@ -511,7 +522,7 @@ if (inputMap["a"] || inputMap["ArrowLeft"]) {
         rotatingLeft=true
     }
 
-    if (startAnimation(animating)) animating = true;
+    if (startAnimation(animating, forward)) animating = true;
 }
 if (inputMap["s"] || inputMap["ArrowDown"]) {
     //wheelR.rotation.x -= 0.05;
@@ -525,15 +536,25 @@ if (inputMap["s"] || inputMap["ArrowDown"]) {
     else ground.rotate(dir, Math.PI / 150, BABYLON.Space.WORLD);
     positionUpdated=true
 
-    if (startAnimation(animating)) animating = true;
-    
+    forward = false;
+
+    if (previous_forward != forward) {
+        if (animating) {
+            emptyAnimArray();
+            animating = false;
+        }
+    }
+
+    if (startAnimation(animating, forward)) animating = true;
+
+    previous_forward = false;
 }
 if (inputMap["d"] || inputMap["ArrowRight"]) {
     //wheelR.rotation.x -= 0.05;
     //wheelL.rotation.x += 0.05;
     player.rotation.z -= rotationSpeed;
 
-    if (startAnimation(animating)) animating = true;
+    if (startAnimation(animating, forward)) animating = true;
 }
 if (!inputMap["w"] && !inputMap["ArrowUp"] &&
     !inputMap["a"] && !inputMap["ArrowLeft"] &&
@@ -541,17 +562,13 @@ if (!inputMap["w"] && !inputMap["ArrowUp"] &&
     !inputMap["d"] && !inputMap["ArrowRight"]) {
         
     if (animating) {
-        for (var i = 0; i < playerAsset.length; i++) {
-            animations[i].stop();
-            playerAsset[i].animations.length = 0;         
-        }
-        animations.length = 0;
+        emptyAnimArray();
+        animating = false;
         stopAnimation();
         for (var i = 0; i < playerAsset.length; i++) {
             scene.beginAnimation(playerAsset[i], 0, frameRate/speed, false);
         }
     }
-    animating = false;
 }
 
 //shoot

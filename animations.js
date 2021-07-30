@@ -1,12 +1,12 @@
 const frameRate = 60;
 const speed = 5;
 
-function addAnimation(leg, forward=true) {
-    const joint1Anim = new BABYLON.Animation("joint1Anim", "rotation.y", 
+function addAnimation(leg, forward) {
+    const joint1Anim = new BABYLON.Animation("joint1Anim", "rotation.z", 
     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    const joint2Anim = new BABYLON.Animation("joint2Anim", "rotation.z", 
+    const joint2Anim = new BABYLON.Animation("joint2Anim", "rotation.y", 
     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    const joint3Anim = new BABYLON.Animation("joint3Anim", "rotation.z", 
+    const joint3Anim = new BABYLON.Animation("joint3Anim", "rotation.y", 
     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
 
     const keyFrames1 = [];
@@ -19,7 +19,6 @@ function addAnimation(leg, forward=true) {
     var i = 1;
     var j1 = 1;
     var j2 = 0;
-    var k = 1;
     var add = 0;
 
     var f = 1;
@@ -104,9 +103,9 @@ function addAnimation(leg, forward=true) {
     joint1Anim.enableBlending = true;
     joint2Anim.enableBlending = true;
     joint3Anim.enableBlending = true;
-    joint1Anim.blendingSpeed = 0.05;
-    joint2Anim.blendingSpeed = 0.05;
-    joint3Anim.blendingSpeed = 0.05;
+    joint1Anim.blendingSpeed = 0.1;
+    joint2Anim.blendingSpeed = 0.1;
+    joint3Anim.blendingSpeed = 0.1;
 
     joint1.animations.push(joint1Anim);
     joint2.animations.push(joint2Anim);
@@ -146,7 +145,7 @@ function bodyAnimation() {
 
     bodyAnim.setKeys(keyFrames);
     bodyAnim.enableBlending = true;
-    bodyAnim.blendingSpeed = 0.05;
+    bodyAnim.blendingSpeed = 0.1;
 
     playerAsset[2].animations.push(bodyAnim);
 }
@@ -183,25 +182,25 @@ function stopAnimation() {
     bodyStopAnim.enableBlending = true;
     yRotAnim.enableBlending = true;
     zRotAnim.enableBlending = true;
-    bodyStopAnim.blendingSpeed = 0.05;
-    yRotAnim.blendingSpeed = 0.05;
-    zRotAnim.blendingSpeed = 0.05;
+    bodyStopAnim.blendingSpeed = 0.1;
+    yRotAnim.blendingSpeed = 0.1;
+    zRotAnim.blendingSpeed = 0.1;
 
     indicesJoints1.forEach(n => {
-        playerAsset[n].animations.push(yRotAnim);
+        playerAsset[n].animations.push(zRotAnim);
     });
     indicesJoints23.forEach(n => {
-        playerAsset[n].animations.push(zRotAnim);
+        playerAsset[n].animations.push(yRotAnim);
     });
     playerAsset[2].animations.push(bodyStopAnim);
 }
 
-function startAnimation(animating) {
+function startAnimation(animating, forward=true) {
     if (!animating) {
-        addAnimation("fl");
-        addAnimation("fr");
-        addAnimation("rl");
-        addAnimation("rr");
+        addAnimation("fl", forward);
+        addAnimation("fr", forward);
+        addAnimation("rl", forward);
+        addAnimation("rr", forward);
         bodyAnimation();
         for (var i = 0; i < playerAsset.length; i++) {
             animations.push(scene.beginAnimation(playerAsset[i], 0, 2*frameRate, true));
@@ -210,4 +209,12 @@ function startAnimation(animating) {
     }
     else 
         return false;
+}
+
+function emptyAnimArray() {
+    for (var i = 0; i < playerAsset.length; i++) {
+        animations[i].stop();
+        playerAsset[i].animations.length = 0;         
+    }
+    animations.length = 0;
 }
