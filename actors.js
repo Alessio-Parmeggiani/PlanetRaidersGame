@@ -122,7 +122,7 @@ class Enemy{
         //new target to choose every x seconds
         const currentTime = new Date().getTime();
         if(currentTime>this.nextUpdateTargetTime) {
-            console.log("changing direction")
+            //console.log("changing direction")
             this.enemyPivot.setParent(null)
             this.enemy.setParent(null)
            
@@ -168,7 +168,7 @@ class Enemy{
 }
 //serve la classe proiettile?
 class Bullet{
-    constructor(mesh,shooter=null,planet,scene){
+    constructor(mesh,shooter=null,planet,speed,range,scene){
         this.mesh=mesh
         this.planet=planet
 
@@ -185,11 +185,11 @@ class Bullet{
         this.bulletAngleOffset = pi/12;
         this.bulletHorizOffset = 0.5;
 
-        this.bulletSpeed = Math.PI / 300;
+        this.bulletSpeed = speed;
         
         this.bulletHeight = 0.3;
 
-        this.bulletRange = 1000;
+        this.bulletRange = range;
 
         this.damage=1;
 
@@ -295,7 +295,7 @@ class Bullet{
         //this.bullet.material = new BABYLON.StandardMaterial("bulletmat", scene);
         this.bullet.checkCollisions = true;    
 
-        this.bulletRange=this.getRangeFromNTurns(1.25)
+        this.bulletRange=this.getRangeFromNTurns(this.bulletRange);
         this.createParticles()
         
     

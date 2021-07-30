@@ -30,18 +30,20 @@ var attackSpeed = 100;
 var rotationSpeed = Math.PI / 100;
 
 
-var bulletRange = 15000;
-var bulletSpeed = Math.PI / 100;
+var bulletRange = 1;    // num of revolutions around the planet
+var bulletSpeed = Math.PI / 300;
 var bulletHeight = 1;
 var bulletCount = 1;
 var bulletAngleOffset = pi/12;
 var bulletHorizOffset = 0.5;
+var bulletMode = "parallel"
 
 
-var playerLife=100
+var playerLife=100;
+var playerSpeed = 150;
 
 //enemy stats
-var numEnemies=0
+var numEnemies=1
 var remainingEnemies=numEnemies
 //not used
 var enemyShooterType=1
@@ -83,26 +85,63 @@ var previous_forward = true;
 var animations = [];
 
 // ------- BUTTON MANAGER -------
-/*
-document.addEventListener("DOMContentLoaded", function(e) {
-    var buttons = document.getElementsByTagName("button");
-    var spans = document.getElementsByTagName("span");
-    console.log(buttons);
-    console.log(spans);
-    for (var butt=0; butt < buttons.length; butt++) {
-        //console.log(buttons);
-        buttons[butt].onclick = function() {
-            console.log("clicked");
-            spans[butt].classList.add("success");
-            for (var span=0; span<spans.length; span++) {
-                spans[span].classList.add("success");
-            }
-        }
-    }
-});
-*/
+const buttons = Array.from(document.getElementsByTagName("button"));
+const congrats = document.getElementById("congrats");
+const message = document.getElementById("message");
+const container = document.getElementById("container");
+const upgrade = document.getElementById("upgrade");
+const upgradeList = document.getElementById("upgradeList");
+const bar = document.getElementById("bar");
+const playerHealth = document.getElementById("playerHealth");
+var chosen_upgrade;
 
-//buttons = document.getElementsByTagName("div");
+buttons.forEach(button => {
+    button.onclick = function() {
+        chosen_upgrade = button.getElementsByTagName("span")[0].textContent;
+        const icon = document.createElement("img");
+        icon.classList.add("icon");
+        console.log(chosen_upgrade);
+        switch (chosen_upgrade) {
+            case "Player speed up":
+                playerSpeed -= 50;
+                icon.src = "icons/Speed up.png";
+                break;
+            case "Bullets +1":
+                bulletCount += 1;
+                icon.src = "icons/Bullets +1.png";
+                break;
+            case "Arc bullets":
+                bulletMode = "arc";
+                icon.src = "icons/Arc bullets.png";
+                break;
+            case "Bullets speed up":
+                bulletSpeed = Math.PI / 50;
+                icon.src = "icons/Bullets speed up.png";
+                break;
+            case "Bullets range up":
+                bulletRange += 0.5;
+                icon.src = "icons/Bullets range up.png";
+                break;
+            case "Health up":
+                playerLife += 33;
+                icon.src = "icons/Health up.png";
+                const moreHealth = document.createElement("div");
+                moreHealth.id = "moreHealth";
+                moreHealth.style.left = 30 + playerHealth.offsetWidth + "px";
+                bar.appendChild(moreHealth);
+                break;
+        }
+        congrats.classList.remove("anim-first");
+        message.classList.remove("anim-first");
+        container.classList.remove("anim-container");
+        upgrade.classList.remove("anim-upgrade");
+        canvas.classList.remove("anim-canvas");
+        upgradeList.appendChild(icon);
+
+        numEnemies += 3;
+        //createEnemies(light); I can't because the light still isn't defined
+    }
+})
 
 //get a random position on surface of sphere
 function randomPos(radius){
@@ -230,7 +269,7 @@ function bulletGen(mesh,bulletCount=1,shooter=null,ground,
     projectiles = [];
     var bullet;
     for (var i=0;i<bulletCount;i++) {
-        bullet=new Bullet(mesh,shooter,ground,scene)
+        bullet=new Bullet(mesh,shooter,ground,speed,range,scene)
         bullet.spawn(dir)
         /*
         bullet.bulletSpeed=speed
@@ -355,11 +394,11 @@ function createEnemies(light){
 
 function endLevel() {
     console.log("endLevel called");
-    document.getElementById("congrats").classList.add("anim-first");
-    document.getElementById("message").classList.add("anim-first");
-    document.getElementById("container").classList.add("anim-container");
-    document.getElementById("upgrade").classList.add("anim-upgrade");
-    document.getElementById("renderCanvas").classList.add("anim-canvas");
+    congrats.classList.add("anim-first");
+    message.classList.add("anim-first");
+    container.classList.add("anim-container");
+    upgrade.classList.add("anim-upgrade");
+    canvas.classList.add("anim-canvas");
 }   
 
 //
@@ -496,8 +535,8 @@ if (inputMap["w"] || inputMap["ArrowUp"]) {
     var dir = player.getDirection(forward);
     dir.normalize();
     
-    if (PLAYERMOVE) playerPivot.rotate(dir, Math.PI / 150, BABYLON.Space.WORLD);  // the player moves, the planet stays still
-    else ground.rotate(dir, -Math.PI / 150, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
+    if (PLAYERMOVE) playerPivot.rotate(dir, Math.PI / playerSpeed, BABYLON.Space.WORLD);  // the player moves, the planet stays still
+    else ground.rotate(dir, -Math.PI / playerSpeed, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
     positionUpdated=true
 
     forward = true;
@@ -579,7 +618,7 @@ if ((inputMap["h"] || inputMap["e"]) && currentTime > nextBulletTime) {
     if (player.rotation.z == 0) player.rotation.z += 0.001;
     var mesh=assets.assetMeshes.get("rocket.babylon");
     var projectiles=bulletGen(mesh,bulletCount,player,ground,
-        "parallel",bulletAngleOffset,bulletHorizOffset,scene)
+        bulletMode,bulletAngleOffset,bulletHorizOffset, bulletRange, bulletSpeed, scene)
     // bullets is all existing bullets, projectiles is the bullets fired at once
     for (var pr=0; pr<projectiles.length;pr++) bullets.push(projectiles[pr]);
     nextBulletTime = new Date().getTime() + attackSpeed;
