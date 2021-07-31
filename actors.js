@@ -10,7 +10,7 @@ class Enemy{
         //move toward target
         this.target=target
         
-
+        this.waitSpawningTime=new Date().getTime()+spawnDurationTime;
         //movement
         this.nextEnemyMoveTime=new Date().getTime();
         this.nextUpdateTargetTime=new Date().getTime();
@@ -64,6 +64,8 @@ class Enemy{
         this.enemy.setParent(this.enemyPivot)
         this.enemyPivot.setParent(this.planet)
 
+        //fadeInAnimation(this.enemy,180)
+
         if(position.x>0) this.direction=-1
 
         this.healthBar = new HealthBar(this.enemy, this.scene,true,this.life);
@@ -71,6 +73,7 @@ class Enemy{
         this.enemy.checkCollisions = true;
 
         if(this.enemyType==enemyFastType) this.velocity*=1.2
+        if(this.enemyType==enemyTankType) this.velocity*=0.3
         //this.enemy.showBoundingBox = true;
     }
 
@@ -78,7 +81,7 @@ class Enemy{
         //move of some distance and wait MoveInterval
         //if moveInterval is set to 0, the movement is continous
         const currentTime = new Date().getTime();
-
+        
         //compute how to rotate pivot
         var forward = new BABYLON.Vector3(0, 0, 1);		
         var direction = this.enemyPivot.getDirection(forward);
@@ -89,18 +92,22 @@ class Enemy{
         //rotation while moving
         this.enemy.addRotation(0,0.05,0)
 
-        //var dir=1
-        if (this.moveInterval<50 || (this.distanceStepMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime)) {
-            //move of velocity
-                      
-            this.enemyPivot.rotate(direction,this.velocity*dir, BABYLON.Space.WORLD);
-            this.distanceStepMoved+=this.velocity
-        }
-        else if(this.distanceStepMoved>0){
-            //stop moving and wait
-            //console.log(dir)
-            this.nextEnemyMoveTime = new Date().getTime() + this.moveInterval;
-            this.distanceStepMoved=0    
+        if(currentTime>this.waitSpawningTime)
+        {   
+            
+            //var dir=1
+            if (this.moveInterval<50 || (this.distanceStepMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime)) {
+                //move of velocity
+                        
+                this.enemyPivot.rotate(direction,this.velocity*dir, BABYLON.Space.WORLD);
+                this.distanceStepMoved+=this.velocity
+            }
+            else if(this.distanceStepMoved>0){
+                //stop moving and wait
+                //console.log(dir)
+                this.nextEnemyMoveTime = new Date().getTime() + this.moveInterval;
+                this.distanceStepMoved=0    
+            }
         }
 
     }

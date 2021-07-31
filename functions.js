@@ -184,7 +184,7 @@ function createEnemies(){
         spawningAnimation(position)
         //taret is player with some randomness
         var target=player
-        var enemy=new Enemy(mesh,ground,target,enemyBullet,enemyType,DEBUG,scene)
+        var enemy=new Enemy(mesh,ground,target,enemyType,DEBUG,scene)
         enemy.spawn(position);
         enemy.enemy.locallyTranslate(new BABYLON.Vector3(0, 0.5, 0))
         enemies.push(enemy)

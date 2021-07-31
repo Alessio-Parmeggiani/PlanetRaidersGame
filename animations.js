@@ -334,22 +334,42 @@ function spawningAnimation(position) {
     });
 
     keyFrames.push({
-        frame: 60,
+        frame: spawnDurationFrame/1.5,
         value: 1
     });
 
     keyFrames.push({
-        frame: 90,
+        frame: spawnDurationFrame,
         value: 0
     });
 
     anim1.setKeys(keyFrames);
-    var spawnAnim1=scene.beginDirectAnimation(cylinder, [anim1], 0,  180, true);
+    var spawnAnim1=scene.beginDirectAnimation(cylinder, [anim1], 0,  spawnDurationFrame, true);
     spawnAnim1.onAnimationEnd=function() { cylinder.dispose()   }
-    var spawnAnim2=scene.beginDirectAnimation(ring1, [anim1], 0,  180, true);
+    var spawnAnim2=scene.beginDirectAnimation(ring1, [anim1], 0,  spawnDurationFrame, true);
     spawnAnim2.onAnimationEnd=function() { ring1.dispose()   }
-    var spawnAnim3=scene.beginDirectAnimation(ring2, [anim1], 0,  180, true);
+    var spawnAnim3=scene.beginDirectAnimation(ring2, [anim1], 0,  spawnDurationFrame, true);
     spawnAnim3.onAnimationEnd=function() { ring2.dispose()   }
 
 
+}
+
+function fadeInAnimation(mesh,duration) {
+    var frameRate=60
+    var anim = new BABYLON.Animation("rising", "visibility",
+     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+    var keyFrames = [];
+
+    keyFrames.push({
+        frame: 0,
+        value: 0
+    });
+
+    keyFrames.push({
+        frame: duration,
+        value: 1
+    });
+
+    anim.setKeys(keyFrames);
+    var spawnAnim=scene.beginDirectAnimation(mesh, [anim], 0,  duration, true);
 }

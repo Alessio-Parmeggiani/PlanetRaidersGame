@@ -17,6 +17,7 @@ var createDefaultEngine = function() {
 
 //
 var pi=Math.PI;
+var framerate=60
 
 //gameplay stats
 var PLAYERMOVE = false;
@@ -40,12 +41,17 @@ var bulletHorizOffset = 0.5;
 var bulletMode = "parallel"
 
 
-var playerLife=100;
+var maxPlayerLife=100;
+var playerLife=maxPlayerLife;
 var playerSpeed = 150;
+var contactDamage=10
+var newVulnerableTime=new Date().getTime()
+//ms of invincibility after contact with enemies
+var invincibleTime=500
 
 //enemy stats
 var numNormalEnemies=1
-var numFastEnemies=0
+var numFastEnemies=1
 var numTankEnemies=0
 
 var probTankEnemy=0.2
@@ -54,7 +60,11 @@ var probFastEnemy=0
 var numEnemies=numNormalEnemies+numFastEnemies+numTankEnemies
 var remainingEnemies=numEnemies
 
-//not used
+//duration of spawning animation
+var spawnDurationTime=3000 //ms
+var spawnDurationFrame=framerate*(spawnDurationTime/1000)
+
+
 var enemyNormalType=1
 var enemyFastType=2
 var enemyTankType=2
@@ -172,6 +182,7 @@ var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3
 light.intensity = 0.8;
 lights.push(light)
 
+/*
 var skyMaterial = new BABYLON.SkyMaterial("skyMaterial", scene);
 skyMaterial.backFaceCulling = false;
 
@@ -181,10 +192,36 @@ skybox.material = skyMaterial;
 skyMaterial.turbidity = 20
 //skyMaterial.azimuth = 0.1;
 skyMaterial.inclination = 0.3;
+*/
+/*
+
+// Environment Texture
+var hdrTexture = new BABYLON.HDRCubeTexture("texture/nebula.hdr", scene, 512);
+
+// Skybox
+var hdrSkybox = BABYLON.Mesh.CreateBox("hdrSkyBox", 1000.0, scene);
+var hdrSkyboxMaterial = new BABYLON.PBRMaterial("skyBox", scene);
+hdrSkyboxMaterial.backFaceCulling = false;
+hdrSkyboxMaterial.reflectionTexture = hdrTexture.clone();
+hdrSkyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+hdrSkyboxMaterial.microSurface = 1.1;
+hdrSkyboxMaterial.cameraExposure = 0.8;
+hdrSkyboxMaterial.cameraContrast = 1.6;
+hdrSkyboxMaterial.disableLighting = true;
+hdrSkybox.material = hdrSkyboxMaterial;
+hdrSkybox.infiniteDistance = true;
+*/
 
 
 
 player=playerAsset[2]
+var playerHitbox=new BABYLON.MeshBuilder.CreateBox("playerHitbox",{width: 1.2,height:0.6},scene)
+playerHitbox.visibility=0
+if(DEBUG){
+    playerHitbox.showBoundingBox = true
+    playerHitbox.visibility=0.2
+}
+playerHitbox.parent=player
 
 var forward = new BABYLON.Vector3(1, 0, 0);		
 var dir = player.getDirection(forward);
@@ -198,6 +235,7 @@ player.rotation.z = 0.01;
 var playerPivot = new BABYLON.TransformNode("root");
 player.parent=playerPivot
 //playerPivot.rotate(BABYLON.Axis.X,-pi/2,BABYLON.Space.LOCAL)
+
 
 
 var spotLight = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(0,0, -planetRadius), 
@@ -432,6 +470,8 @@ if ((inputMap["h"] || inputMap["e"]) && currentTime > nextBulletTime) {
 
 //compute bullet position and collision
 scene.registerBeforeRender(function () {
+
+var currentTime=new Date().getTime()
 //console.log(bullets)
 for (var idx = 0; idx < bullets.length; idx++) {
 
@@ -444,8 +484,8 @@ for (var idx = 0; idx < bullets.length; idx++) {
     var bulletFall=false;
     if(bulletHeight<=planetRadius+bulletMesh.getBoundingInfo().boundingBox.extendSize.x) bulletFall=true  ;
     //bulletFall=false
-    //collision with ground
-    
+
+    //collision bullet-ground
     if (bulletFall) {
         bulletMesh.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
         bulletMesh.dispose();    // delete from scene
@@ -453,7 +493,8 @@ for (var idx = 0; idx < bullets.length; idx++) {
         bullets.splice(idx,1);   // delete from array
         
     }
-    //collision bullet objects
+
+    //collision bullet-objects
     collidingObjects.forEach(objects => {
         for( var i=0; i<objects.length;i++){
             if (bulletMesh.intersectsMesh(objects[i], false)){
@@ -466,44 +507,56 @@ for (var idx = 0; idx < bullets.length; idx++) {
         }
     })
     
-    //collision bullet-enemies
+    //collision bullet-enemies 
     for (let j=0; j<enemies.length; j++) {
-            if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
-                console.log("enemy hit");
-                dead=enemies[j].whenHit(bullet.damage);
-                if (dead) {
-                    enemies.splice(j, 1);
-                    remainingEnemies=enemies.length
-                }
-
-                //explode(enemies[j])
-
-                bulletMesh.dispose();
-                pivot.dispose();
-                bullets.splice(idx, 1);
-
-                if (enemies.length == 0) {
-                    console.log("all enemies dead");
-                    endLevel();
-                }
+        if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
+            console.log("enemy hit");
+            dead=enemies[j].whenHit(bullet.damage);
+            if (dead) {
+                enemies.splice(j, 1);
+                remainingEnemies=enemies.length
             }
+
+            //explode(enemies[j])
+
+            bulletMesh.dispose();
+            pivot.dispose();
+            bullets.splice(idx, 1);
+
+            if (enemies.length == 0) {
+                console.log("all enemies dead");
+                endLevel();
+            }
+        }
+    }
+    
+}
+
+for(var idx = 0; idx < enemies.length; idx++) {
+    //move enemies
+    enemies[idx].moveStep()
+    positionUpdated=true
+    if(positionUpdated) {
+        enemies[idx].updatePosition()
     }
 
+    //collision enemy-player
+    //console.log(":"+ newVulnerableTime)
+    if(currentTime>newVulnerableTime){
+        if (playerHitbox.intersectsMesh(enemies[idx].enemy, false)){
+            playerLife-=contactDamage
+            newVulnerableTime= currentTime+invincibleTime
+            console.log(playerLife)
+        }
+    }
 }
+positionUpdated=false
 
 });
 
 //Move enemies
 scene.registerBeforeRender(function () {   
-    for (var idx = 0; idx < enemies.length; idx++) {
-        
-        enemies[idx].moveStep()
-        positionUpdated=true
-        if(positionUpdated) {
-            enemies[idx].updatePosition()
-        }
-    }
-    positionUpdated=false
+    
 })
 
 }//END MAIN
