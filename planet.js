@@ -20,20 +20,21 @@ var pi=Math.PI;
 
 //gameplay stats
 var PLAYERMOVE = false;
-var DEBUG = true;
+var DEBUG = false;
 
 //player stats
 var playerWidth = 0.75;
 var wheelWidth = 0.5;
 
-var attackSpeed = 100;
+var attackSpeed = 300;
 var rotationSpeed = Math.PI / 100;
 
 
 var bulletRange = 1;    // num of revolutions around the planet
-var bulletSpeed = Math.PI / 300;
+var bulletSpeed = Math.PI / 100;
 var bulletHeight = 1;
-var bulletCount = 1;
+var bulletParallelCount = 1;
+var bulletArcCount = 1;
 var bulletAngleOffset = pi/12;
 var bulletHorizOffset = 0.5;
 var bulletMode = "parallel"
@@ -43,11 +44,20 @@ var playerLife=100;
 var playerSpeed = 150;
 
 //enemy stats
-var numEnemies=1
+var numNormalEnemies=1
+var numFastEnemies=0
+var numTankEnemies=0
+
+var probTankEnemy=0.2
+var probFastEnemy=0
+
+var numEnemies=numNormalEnemies+numFastEnemies+numTankEnemies
 var remainingEnemies=numEnemies
+
 //not used
-var enemyShooterType=1
-var enemyWalkerType=2
+var enemyNormalType=1
+var enemyFastType=2
+var enemyTankType=2
 
 //other stats
 var planetDiameter = 6;
@@ -66,6 +76,7 @@ const assetsPath = [
     "rocket.babylon", 
     "grass2.babylon",
     "enemy.babylon",
+    "enemyFast.babylon",
     "grass.babylon",
 ]
 
@@ -77,6 +88,7 @@ const playerPath = [
 var bullets = [];
 var collidingObjects = [];
 var enemies = [];
+var lights=[]
 
 // ---- Animations ----
 var animating = false;
@@ -107,11 +119,11 @@ buttons.forEach(button => {
                 icon.src = "icons/Speed up.png";
                 break;
             case "Bullets +1":
-                bulletCount += 1;
+                bulletParallelCount += 1;
                 icon.src = "icons/Bullets +1.png";
                 break;
             case "Arc bullets":
-                bulletMode = "arc";
+                bulletArcCount+=2;
                 icon.src = "icons/Arc bullets.png";
                 break;
             case "Bullets speed up":
@@ -138,268 +150,11 @@ buttons.forEach(button => {
         canvas.classList.remove("anim-canvas");
         upgradeList.appendChild(icon);
 
-        numEnemies += 3;
+        //numEnemies += 3;
+        newLevel()
         //createEnemies(light); I can't because the light still isn't defined
     }
 })
-
-//get a random position on surface of sphere
-function randomPos(radius){
-    var x = Math.random();
-    x *= Math.round(Math.random()) ? 1 : -1;
-    var y = Math.random();
-    y *= Math.round(Math.random()) ? 1 : -1;
-    var z = Math.random();
-    z *= Math.round(Math.random()) ? 1 : -1;
-    var num = x * x + y * y + z * z;
-    if (num == 0) {
-        x = 0;
-        y = 0;
-        z = 0;
-    }
-    else {
-        x *= 1 / Math.sqrt(num);
-        y *= 1 / Math.sqrt(num);
-        z *= 1 / Math.sqrt(num);
-        x = (x * radius);
-        y = (y * radius);
-        z = (z * radius);
-    }
-    return new BABYLON.Vector3(x,y,z);
-}
-
-function explode(emitter) {
-        BABYLON.ParticleHelper.CreateAsync("explosion", scene).then((set) => {
-            set.systems.forEach(s => {
-                s.minSize=0.01
-                s.maxSize=0.05
-                s.disposeOnStop = true;
-                //console.log(s)
-            });
-            set.start(emitter);
-            
-        });
-        
-}
-
-//
-function getPointNearPosition(p0,range){
-    //random positive or negative
-    var ranPos=Math.round(Math.random()) ? 1 : -1;
-    var x=p0.x +(Math.random()*range*ranPos)
-    var y=p0.y +(Math.random()*range*ranPos)
-    var z=p0.z +(Math.random()*range*ranPos)
-
-    var pos=new BABYLON.Vector3(x,y,z)
-    var dir=pos
-    dir.normalize()
-    var ret=dir.scale(planetRadius)
-    //check if point is on surface
-    //console.log((ret.x*ret.x +ret.y*ret.y +ret.z*ret.z)==planetRadius*planetRadius)
-    return ret
-
-}
-
-//orient object in right direction
-function orientSurface(object,position,ground) {
-    var directionPoint = position;
-    directionPoint.normalize();
-    var yaxis = directionPoint;
-    var xaxis = BABYLON.Vector3.Cross(BABYLON.Axis.Y, yaxis);
-    var zaxis = BABYLON.Vector3.Cross(xaxis, yaxis);
-    //half of height
-    var objHeight = object.getBoundingInfo().boundingBox.extendSize;
-    
-    object.position = ground.position.add(directionPoint.scale(planetRadius));
-   
-    BABYLON.Vector3.RotationFromAxisToRef(xaxis, yaxis, zaxis, object.rotation);
-}
-
-function getGlobalRotation(obj){
-    var scale = new BABYLON.Vector3(0, 0, 0);
-    var rotation = new BABYLON.Quaternion();
-    var translation = new BABYLON.Vector3(0,0,0);
-
-    var tempWorldMatrix = obj.getWorldMatrix();
-    tempWorldMatrix.decompose(scale, rotation, translation);
-    return rotation;
-
-}
-//uniformly distribute something on planet
-function uniformlyDistribute(mesh,ground,density=0.5,collisions=false,scene){
-    
-    objects = [];
-    for (var i = 0; i < 100; i++) {
-        if (Math.random()<density) {
-            obj = mesh.createInstance();        
-            var scale = 1 + Math.random() * 2;
-            //point on surface of sphere
-            var position = randomPos(planetDiameter/2);
-            obj.position = position;
-            orientSurface(obj,position,ground);
-
-            obj.parent = ground;
-            objects.push(obj);
-   
-            if(collisions) {
-                obj.checkCollisions = true;
-            }
-        }
-        
-    }
-
-    if (collisions) collidingObjects.push(objects);
-    return objects;
-}
-
-function bulletGen(mesh,bulletCount=1,shooter=null,ground,
-    mode="parallel",bulletAngleOffset=bulletAngleOffset,bulletHorizOffset=0.5,
-    range=bulletRange, speed=bulletSpeed,scene) {
-
-    bulletHorizOffset = mesh.getBoundingInfo().boundingBox.extendSize.x*1.1;
-
-    var dir;
-    var playerRot=getGlobalRotation(player).toEulerAngles()
-    if (mode=="arc") dir = playerRot.z - ((bulletCount-1)/2 * bulletAngleOffset);
-    else if (mode=="parallel") {
-        dir=playerRot.z;
-        var horizPosition = -(bulletCount-1)/2 * bulletHorizOffset;
-    }
-
-    projectiles = [];
-    var bullet;
-    for (var i=0;i<bulletCount;i++) {
-        bullet=new Bullet(mesh,shooter,ground,speed,range,scene)
-        bullet.spawn(dir)
-        /*
-        bullet.bulletSpeed=speed
-        bullet.bulletRange=range
-        */
-        projectiles.push(bullet);
-
-        if(mode=="parallel") {
-            bullet.bullet.locallyTranslate(new BABYLON.Vector3(horizPosition, 0, 0));
-            horizPosition += bulletHorizOffset;
-        }
-        if (mode=="arc") dir += bulletAngleOffset;
-    
-    }
-    return projectiles
-}
-
-//rotate obj from A to B
-function rotateTowards(obj,A,B){
-    //var direction = B.getAbsolutePosition().subtract(A.getAbsolutePosition());
-    var direction=B.subtract(A);
-    obj.rotation = direction;
-
-    //const target = enemyDir;
-    obj.lookAt(direction);
-    obj.rotate(new BABYLON.Vector3(1, 0 ,0), Math.PI/2);
-}
-
-function spawningAnimation(position) {
-    var cylinder = BABYLON.MeshBuilder.CreateCylinder("spawnAnimation",{height: 1}, scene);
-    //var cylinder=assets.assetMeshes.get("teleport.babylon").createInstance();
-    
-    console.log(cylinder)
-    cylinder.position=position
-    //cylinder.scaling.y=0.08
-    //cylinder.rotation.z=Math.PI/4
-    //cylinder.visibility=0
-    
-    
-    orientSurface(cylinder,position,ground)
-    cylinder.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
-    var material = new BABYLON.StandardMaterial("mat", scene);
-    material.emissiveColor = new BABYLON.Color3(0.2, 0.6, 1);
-    material.diffuseTexture = new BABYLON.Texture("texture/effect.png", scene);
-    
-    //material.diffuseTexture.hasAlpha = true;
-    material.opacityTexture=new BABYLON.Texture("texture/blend.png", scene);
-    material.opacityTexture.wAng = -Math.PI/2; 
-    
-    cylinder.material=material
-
-    var ring1 = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.1,diameter:1.2},scene);
-    orientSurface(ring1,position,ground)
-    ring1.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
-    ring1.material=material
-   
-    scene.registerBeforeRender(function () {
-        ring1.rotation.y+=0.3
-        
-    })
-
-    var ring2 = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.1,diameter:1.2},scene);
-    orientSurface(ring2,position,ground)
-    ring2.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
-    ring2.material=material
-
-    scene.registerBeforeRender(function () {
-        ring2.rotation.x-=0.2
-    })
-
-    var frameRate=60
-    var anim1 = new BABYLON.Animation("rising", "visibility",
-     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-    var keyFrames = []; 
-
-    keyFrames.push({
-        frame: 0,
-        value: 0
-    });
-
-    keyFrames.push({
-        frame: 60,
-        value: 1
-    });
-
-    keyFrames.push({
-        frame: 90,
-        value: 0
-    });
-
-    anim1.setKeys(keyFrames);
-    scene.beginDirectAnimation(cylinder, [anim1], 0,  180, true);
-    scene.beginDirectAnimation(ring1, [anim1], 0,  180, true);
-    scene.beginDirectAnimation(ring2, [anim1], 0,  180, true);
-    
-
-}
-
-function createEnemies(light){   
-    //CREATE ENEMIES
-    //var mesh = BABYLON.MeshBuilder.CreateCylinder("enemy", {height: 0.1 }, scene);
-
-    //mesh.visibility=0.5
-    var mesh=assets.assetMeshes.get("enemy.babylon");
-    mesh.scaling=new BABYLON.Vector3(0.4,0.4,0.4)
-    //mesh.material.subMaterials[5].alpha=0.1
-    console.log(mesh.material)
-
-    
-    for(var i=0;i<numEnemies;i++) {
-        var position=randomPos(planetRadius)
-        var enemyBullet=assets.assetMeshes.get("rocketTest.babylon");
-        spawningAnimation(position)
-        //taret is player with some randomness
-        var target=player
-        var enemy=new Enemy(mesh,ground,target,enemyBullet,enemyShooterType,DEBUG,scene)
-        enemy.spawn(position, light);
-        enemy.enemy.locallyTranslate(new BABYLON.Vector3(0, 0.5, 0))
-        enemies.push(enemy)
-    }
-}
-
-function endLevel() {
-    console.log("endLevel called");
-    congrats.classList.add("anim-first");
-    message.classList.add("anim-first");
-    container.classList.add("anim-container");
-    upgrade.classList.add("anim-upgrade");
-    canvas.classList.add("anim-canvas");
-}   
 
 //
 //----------------MAIN LOOP--------------------
@@ -415,7 +170,17 @@ camera.wheelPrecision = 45;
 //var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-1, -1, 1), scene);
 light.intensity = 0.8;
+lights.push(light)
 
+var skyMaterial = new BABYLON.SkyMaterial("skyMaterial", scene);
+skyMaterial.backFaceCulling = false;
+
+//Sky material
+var skybox = BABYLON.Mesh.CreateBox("skyBox", 1000.0, scene);
+skybox.material = skyMaterial;
+skyMaterial.turbidity = 20
+//skyMaterial.azimuth = 0.1;
+skyMaterial.inclination = 0.3;
 
 
 
@@ -429,6 +194,7 @@ dir.normalize();
 //player.rotation.x-=pi/2
 //player.rotation.z+=pi
 player.position.z = -planetDiameter / 2;
+player.rotation.z = 0.01;
 var playerPivot = new BABYLON.TransformNode("root");
 player.parent=playerPivot
 //playerPivot.rotate(BABYLON.Axis.X,-pi/2,BABYLON.Space.LOCAL)
@@ -439,6 +205,7 @@ var spotLight = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(0,0, -pla
     spotLight.diffuse = new BABYLON.Color3(1, 1, 0);
     spotLight.intensity=0.5
 spotLight.parent=player
+lights.push(spotLight)
 
 //creating the planet
 ground = BABYLON.MeshBuilder.CreateSphere("ground", { diameter: planetDiameter, segments: 32 }, scene);
@@ -453,6 +220,25 @@ planetMaterial.bumpTexture.vScale=10
 planetMaterial.bumpTexture.level=0.4
 ground.material = planetMaterial;
 
+
+sun = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 30, segments: 32 }, scene);
+sun.position=new BABYLON.Vector3(100,0,300)
+var sunMaterial = new BABYLON.StandardMaterial("sunMat", scene);
+sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
+sun.material=sunMaterial
+
+var gl = new BABYLON.GlowLayer("glow", scene);
+gl.intensity = 0.7;
+gl.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
+    if (mesh.name === "sun") {
+        result.set(1, 0.8, 0, 1);
+    } else {
+        result.set(0, 0, 0, 0);
+    }
+}
+
+var hl = new BABYLON.HighlightLayer("hl1", scene);
+hl.addMesh(sun,new BABYLON.Color3(1,0.5,0));
 
 
 // to avoid that the scaling influences also its children (i.e. the health bar)
@@ -493,7 +279,7 @@ scene.registerBeforeRender(function () {
 //some debug utilities
 if (DEBUG) {
     //ground.showBoundingBox = true
-    //ground.visibility = 0.3;
+    ground.visibility = 0.3;
     player.visibility = 0.8;
 }
 
@@ -615,12 +401,29 @@ const currentTime = new Date().getTime();
 if ((inputMap["h"] || inputMap["e"]) && currentTime > nextBulletTime) {
     
     //avoid singular case
-    if (player.rotation.z == 0) player.rotation.z += 0.001;
+    console.log(player.rotation.z)
+
+    //avoid gimbal lock
+    if (player.rotation.z == 0) player.rotation.z += 0.01;
     var mesh=assets.assetMeshes.get("rocket.babylon");
-    var projectiles=bulletGen(mesh,bulletCount,player,ground,
+    //shoot parallel bullets
+    
+    bulletMode="parallel"
+    var projectiles=bulletGen(mesh,bulletParallelCount,player,ground,
+        bulletMode,bulletAngleOffset,bulletHorizOffset, bulletRange, bulletSpeed, scene)
+    
+    // bullets is all existing bullets, projectiles is the bullets fired at once
+    for (var pr=0; pr<projectiles.length;pr++) bullets.push(projectiles[pr]);
+    
+
+    //shoot arc bullet
+    
+    bulletMode="arc"
+    var projectiles=bulletGen(mesh,bulletArcCount,player,ground,
         bulletMode,bulletAngleOffset,bulletHorizOffset, bulletRange, bulletSpeed, scene)
     // bullets is all existing bullets, projectiles is the bullets fired at once
     for (var pr=0; pr<projectiles.length;pr++) bullets.push(projectiles[pr]);
+    
     nextBulletTime = new Date().getTime() + attackSpeed;
     
 }
@@ -629,7 +432,7 @@ if ((inputMap["h"] || inputMap["e"]) && currentTime > nextBulletTime) {
 
 //compute bullet position and collision
 scene.registerBeforeRender(function () {
-
+//console.log(bullets)
 for (var idx = 0; idx < bullets.length; idx++) {
 
     var bullet = bullets[idx];

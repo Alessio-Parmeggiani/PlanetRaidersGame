@@ -1,5 +1,5 @@
 class Enemy{
-    constructor(mesh,planet,target,bulletMesh,enemyType,DEBUG=true,scene){
+    constructor(mesh,planet,target,enemyType,DEBUG=true,scene){
         this.mesh=mesh
 
         this.enemy=null
@@ -19,13 +19,13 @@ class Enemy{
 
         //how much to move per frame
         this.velocity=Math.PI/200
-        this.velocity=0
+        //this.velocity=0
 
         //how much to wait before moving again, if 0 continue movement
         this.moveInterval=5 //ms
         //how much to wait before updating the target to another point near player
-        this.updateTargetInterval=100
-
+        this.updateTargetInterval=500
+        this.accuracy=0
 
         //distance traveled in this step
         this.distanceStepMoved=0
@@ -37,22 +37,13 @@ class Enemy{
         
         this.healthBar = null;
         
-        this.bullet=bulletMesh
-
-        //1: shooter
-        //2: follow player
-        this.enemyType=enemyType
-        this.bulletCount=1
+        this.enemyType=enemyType 
 
         this.DEBUG=DEBUG
 
-       
-        // to change its color when hit
-        //this.mesh.material = new BABYLON.StandardMaterial("matEnemy", scene);
-        //this.mesh.material.diffuse = new BABYLON.Color3(1, 1, 1);
     }
 
-    spawn(position=new BABYLON.Vector3(0,0,0), light){
+    spawn(position=new BABYLON.Vector3(0,0,0)){
         console.log("creating enemy at: "+position)
         //time used for naming
         const currentTime = new Date().getTime();
@@ -75,9 +66,11 @@ class Enemy{
 
         if(position.x>0) this.direction=-1
 
-        this.healthBar = new HealthBar(this.enemy, light, this.scene,true,this.life);
+        this.healthBar = new HealthBar(this.enemy, this.scene,true,this.life);
       
         this.enemy.checkCollisions = true;
+
+        if(this.enemyType==enemyFastType) this.velocity*=1.2
         //this.enemy.showBoundingBox = true;
     }
 
@@ -92,7 +85,10 @@ class Enemy{
         direction.normalize();
 
         var dir=this.direction
+
+        //rotation while moving
         this.enemy.addRotation(0,0.05,0)
+
         //var dir=1
         if (this.moveInterval<50 || (this.distanceStepMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime)) {
             //move of velocity
@@ -106,18 +102,18 @@ class Enemy{
             this.nextEnemyMoveTime = new Date().getTime() + this.moveInterval;
             this.distanceStepMoved=0    
         }
-        /*
-        //i don't know if this should be used
-        if(currentTime>this.nextUpdateTargetTime) {
-            this.updatePosition();
-            this.nextUpdateTargetTime = new Date().getTime() + this.updateTargetInterval;
-        }
-        */
+
     }
 
     updatePosition(){
         //console.log("changing direction")
         //every step it should update the direction
+
+        this.accuracy=0.2*remainingEnemies
+        if(this.enemyType==enemyFastType) {
+            this.accuracy=(this.accuracy+1)*2
+            //this.nextUpdateTargetTime/=3
+        }
 
         //new target to choose every x seconds
         const currentTime = new Date().getTime();
@@ -129,7 +125,7 @@ class Enemy{
             this.enemyPivot.rotation = BABYLON.Vector3.Zero()    
 
             //new target
-            var newTarget=getPointNearPosition(this.target.getAbsolutePosition(),0.2*remainingEnemies)
+            var newTarget=getPointNearPosition(this.target.getAbsolutePosition(),this.accuracy)
             rotateTowards(this.enemyPivot,this.enemy.getAbsolutePosition(),newTarget)
     
             if(this.enemy.getAbsolutePosition().x>0) this.direction=-1
@@ -143,9 +139,6 @@ class Enemy{
 
     }
 
-
-    // If the enemy is hit once it becomes red, when it's hit the second
-    // time it disappears
     whenHit(damage) {
         this.life-=damage
         this.healthBar.whenHit(damage)
@@ -158,17 +151,12 @@ class Enemy{
             return 0;
         }
     }
-
-    shoot(){
-        var projectiles=bulletGen(this.bullet,this.bulletCount,this.enemy,this.planet,
-            "parallel",scene)
-        for (var pr=0; pr<projectiles.length;pr++) bullets.push(projectiles[pr]);
-    }
   
 }
+
 //serve la classe proiettile?
 class Bullet{
-    constructor(mesh,shooter=null,planet,speed,range,scene){
+    constructor(mesh,shooter=null,planet,scene){
         this.mesh=mesh
         this.planet=planet
 
@@ -185,24 +173,20 @@ class Bullet{
         this.bulletAngleOffset = pi/12;
         this.bulletHorizOffset = 0.5;
 
-        this.bulletSpeed = speed;
+        //this.bulletSpeed = Math.PI / 300;
+        this.bulletSpeed=bulletSpeed
         
         this.bulletHeight = 0.3;
 
-        this.bulletRange = range;
+        this.bulletRange = 1000;
 
         this.damage=1;
 
         this.bulletSize=0
 
         
-    }/*
-    setSpeed(speed) {
-        this.bulletSpeed=speed
     }
-    setRange(range) {
-        this.bulletRange=range
-    }*/
+
     getRangeFromNTurns(N) {
         var s=this.bulletSpeed
         var hi=this.bulletHeight
@@ -215,17 +199,14 @@ class Bullet{
         var particles= new BABYLON.ParticleSystem("particles", 500);
         particles.particleTexture = new BABYLON.Texture("texture/flare.png");
         particles.emitter= this.bullet
-        
-        //console.log(mesh.getBoundingInfo().boundingBox.extendSize)
-        //particles.worldOffset=new BABYLON.Vector3(0, -mesh.getBoundingInfo().boundingBox.extendSize.y,0);
+             
         var direction1=new BABYLON.Vector3(0, -10,0)
         var direction2=new BABYLON.Vector3(0, -5, 0)
-        //particles.createPointEmitter(direction1, direction2);
+
         var maxEmitBox=new BABYLON.Vector3(0.1, 0.1, 0)
         var minEmitBox=new BABYLON.Vector3(-0.1, -0.1, 0)
         particles.createBoxEmitter(direction1,direction2,minEmitBox,maxEmitBox)
-        
-        
+               
         particles.color1=new BABYLON.Color3(1,0,0)
         particles.color2=new BABYLON.Color3(0.5,0.5,0)
         particles.colorDead=new BABYLON.Color3(0.1,0.1,0.1)
@@ -235,23 +216,20 @@ class Bullet{
 
         particles.minSize=0.05
         particles.maxSize=0.2
-
-        particles.emitRate = 300;
-        //particles.direction1=direction1
-        //particles.direction2 =direction2
-        console.log(particles)
-        //particles.isLocal = true;
-
-
+        
+        //optimization if many bullets
+        var emitRate= 300/( (bulletArcCount+bulletParallelCount)/3 );
+        if(emitRate<50) particles.emitRate = 50
+        particles.emitRate =emitRate
+        
         particles.startPositionFunction = (worldMatrix, positionToUpdate, particle, isLocal) => {
             var randX = BABYLON.Scalar.RandomRange(minEmitBox.x, maxEmitBox.x);
             var randY = BABYLON.Scalar.RandomRange(minEmitBox.y, maxEmitBox.y);
             randY-=this.bulletSize.y
             var randZ = BABYLON.Scalar.RandomRange(minEmitBox.z, maxEmitBox.z);
             BABYLON.Vector3.TransformCoordinatesFromFloatsToRef(randX, randY, randZ, worldMatrix, positionToUpdate);
-          };
-
-        
+        };
+    
         particles.start();
 
 
@@ -295,22 +273,24 @@ class Bullet{
         //this.bullet.material = new BABYLON.StandardMaterial("bulletmat", scene);
         this.bullet.checkCollisions = true;    
 
-        this.bulletRange=this.getRangeFromNTurns(this.bulletRange);
+        this.bulletRange=this.getRangeFromNTurns(1.25)
         this.createParticles()
         
     
     }
 
     move() {
+        
         this.bullet.rotation.y+=0.1
-        //this.bullet.locallyTranslate(new BABYLON.Vector3(0, 0, 1/this.bulletRange));
+        
         this.bullet.position.z-=this.bulletRange
         this.pivot.rotate(this.axis, this.bulletSpeed * this.direction, BABYLON.Space.LOCAL);
+       
     }
 }
 
 class HealthBar {
-    constructor(player, light, scene, enemy=true,life) {
+    constructor(player, scene, enemy=true,life) {
         this.player = player;
 
         this.mesh = BABYLON.MeshBuilder.CreateCylinder("healthbar",
@@ -326,8 +306,6 @@ class HealthBar {
         this.redThreshold=0.3
 
         if (enemy) {
-            //this.mesh.position.z = -0.5;
-            //this.mesh.position.z = player.getBoundingInfo().boundingBox.extendSize.y;
             this.mesh.position.y= player.getBoundingInfo().boundingBox.extendSize.z*1.4
         }
         else {
@@ -339,7 +317,7 @@ class HealthBar {
 
         this.mesh.material = new BABYLON.StandardMaterial("healthbar", scene);
         this.mesh.material.emissiveColor = new BABYLON.Color3(0, 1, 0);
-        light.excludedMeshes.push(this.mesh);
+        for(var l=0;l<lights.length;l++) lights[l].excludedMeshes.push(this.mesh);
         
         var gl = new BABYLON.GlowLayer("glow", scene);
         gl.intensity = 0.3;

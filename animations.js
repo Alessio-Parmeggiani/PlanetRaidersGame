@@ -218,3 +218,63 @@ function emptyAnimArray() {
     }
     animations.length = 0;
 }
+
+
+function cannonShoot() {
+    
+    var totalDuration=frameRate*(attackSpeed/1000)
+    var cannon=playerAsset[3]
+
+    //in case of erro, position int he correct place
+    cannon.position.y=0.1575
+
+    var pos=cannon.position.y
+    var rot=cannon.rotation.y
+    console.log(pos)
+
+    
+    const cannonAnim = new BABYLON.Animation("cannonAnim", "rotation.y", 
+    frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+
+    keyFrames = [];
+
+    keyFrames.push({
+        frame: 0,
+        value: rot
+    });
+    keyFrames.push({
+        frame: 0.5*totalDuration,
+        value: rot+Math.PI/4
+    });
+
+
+    cannonAnim.setKeys(keyFrames);
+    cannonAnim.enableBlending = true;
+    cannonAnim.blendingSpeed = 0.1;
+
+    const cannonAnim2 = new BABYLON.Animation("cannonAnim", "position.y", 
+    frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+
+    keyFrames = [];
+
+    keyFrames.push({
+        frame: 0,
+        value: pos
+    });
+    keyFrames.push({
+        frame: 0.2*totalDuration,
+        value: pos-0.1
+    });
+    keyFrames.push({
+        frame: 0.8*totalDuration,
+        value: pos
+    });
+    cannonAnim2.setKeys(keyFrames);
+
+    scene.beginDirectAnimation(cannon, [cannonAnim,cannonAnim2], 0,  0.8*totalDuration, true);
+
+    
+
+    
+
+}
