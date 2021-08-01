@@ -50,11 +50,12 @@ var newVulnerableTime=new Date().getTime()
 var invincibleTime=500
 
 //enemy stats
-var numNormalEnemies=1
+var enemyLife=5
+var numNormalEnemies=2
 var numFastEnemies=1
-var numTankEnemies=0
+var numTankEnemies=1
 
-var probTankEnemy=0.2
+var probTankEnemy=0
 var probFastEnemy=0
 
 var numEnemies=numNormalEnemies+numFastEnemies+numTankEnemies
@@ -67,7 +68,7 @@ var spawnDurationFrame=framerate*(spawnDurationTime/1000)
 
 var enemyNormalType=1
 var enemyFastType=2
-var enemyTankType=2
+var enemyTankType=3
 
 //other stats
 var planetDiameter = 6;
@@ -88,6 +89,7 @@ const assetsPath = [
     "enemy.babylon",
     "enemyFast.babylon",
     "grass.babylon",
+    "enemyTank.babylon"
 ]
 
 const playerPath = [
@@ -182,35 +184,6 @@ var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3
 light.intensity = 0.8;
 lights.push(light)
 
-/*
-var skyMaterial = new BABYLON.SkyMaterial("skyMaterial", scene);
-skyMaterial.backFaceCulling = false;
-
-//Sky material
-var skybox = BABYLON.Mesh.CreateBox("skyBox", 1000.0, scene);
-skybox.material = skyMaterial;
-skyMaterial.turbidity = 20
-//skyMaterial.azimuth = 0.1;
-skyMaterial.inclination = 0.3;
-*/
-/*
-
-// Environment Texture
-var hdrTexture = new BABYLON.HDRCubeTexture("texture/nebula.hdr", scene, 512);
-
-// Skybox
-var hdrSkybox = BABYLON.Mesh.CreateBox("hdrSkyBox", 1000.0, scene);
-var hdrSkyboxMaterial = new BABYLON.PBRMaterial("skyBox", scene);
-hdrSkyboxMaterial.backFaceCulling = false;
-hdrSkyboxMaterial.reflectionTexture = hdrTexture.clone();
-hdrSkyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-hdrSkyboxMaterial.microSurface = 1.1;
-hdrSkyboxMaterial.cameraExposure = 0.8;
-hdrSkyboxMaterial.cameraContrast = 1.6;
-hdrSkyboxMaterial.disableLighting = true;
-hdrSkybox.material = hdrSkyboxMaterial;
-hdrSkybox.infiniteDistance = true;
-*/
 
 
 
@@ -277,42 +250,6 @@ gl.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
 
 var hl = new BABYLON.HighlightLayer("hl1", scene);
 hl.addMesh(sun,new BABYLON.Color3(1,0.5,0));
-
-
-// to avoid that the scaling influences also its children (i.e. the health bar)
-//player.bakeCurrentTransformIntoVertices();
-//player.position.z = -planetDiameter / 2;
-//console.log(player.getAbsolutePosition())
-
-
-//this is useful to see which player asset correspond to what
-/*
-0: lower body           /
-1: front left joint 1   Z
-2: upper body           Z
-3: cannon               Z
-4: front left joint 2   Y
-5: front left joint 3   Y
-
-6: front right joint 1  Z
-7: rear left joint 1    Z
-8: rear right joint 1   Z
-
-9: front right joint 2  Y
-10: rear left joint 2   Y
-11: rear right joint 2  Y
-
-12: front right joint 3 Y
-13: rear left joint 3   Y
-14: rear right joint 3  Y
-
-*/
-/*
-scene.registerBeforeRender(function () {
-    playerAsset[2].rotation.z+=0.01
-})
-*/
-
 
 //some debug utilities
 if (DEBUG) {
@@ -445,7 +382,7 @@ if ((inputMap["h"] || inputMap["e"]) && currentTime > nextBulletTime) {
     if (player.rotation.z == 0) player.rotation.z += 0.01;
     var mesh=assets.assetMeshes.get("rocket.babylon");
     //shoot parallel bullets
-    
+    cannonShoot()
     bulletMode="parallel"
     var projectiles=bulletGen(mesh,bulletParallelCount,player,ground,
         bulletMode,bulletAngleOffset,bulletHorizOffset, bulletRange, bulletSpeed, scene)
@@ -490,8 +427,7 @@ for (var idx = 0; idx < bullets.length; idx++) {
         bulletMesh.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
         bulletMesh.dispose();    // delete from scene
         pivot.dispose();
-        bullets.splice(idx,1);   // delete from array
-        
+        bullets.splice(idx,1);   // delete from array 
     }
 
     //collision bullet-objects
@@ -517,16 +453,15 @@ for (var idx = 0; idx < bullets.length; idx++) {
                 remainingEnemies=enemies.length
             }
 
-            //explode(enemies[j])
-
-            bulletMesh.dispose();
-            pivot.dispose();
-            bullets.splice(idx, 1);
-
             if (enemies.length == 0) {
                 console.log("all enemies dead");
                 endLevel();
             }
+            
+            bulletMesh.dispose();
+            pivot.dispose();
+            bullets.splice(idx, 1);
+            break
         }
     }
     
@@ -546,7 +481,7 @@ for(var idx = 0; idx < enemies.length; idx++) {
         if (playerHitbox.intersectsMesh(enemies[idx].enemy, false)){
             playerLife-=contactDamage
             newVulnerableTime= currentTime+invincibleTime
-            console.log(playerLife)
+            console.log("playerLife: "+playerLife)
         }
     }
 }

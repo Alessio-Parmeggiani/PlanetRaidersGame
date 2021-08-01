@@ -1,6 +1,28 @@
 const frameRate = 60;
 const speed = 5;
 
+/*
+0: lower body           /
+1: front left joint 1   Z
+2: upper body           Z
+3: cannon               Z
+4: front left joint 2   Y
+5: front left joint 3   Y
+
+6: front right joint 1  Z
+7: rear left joint 1    Z
+8: rear right joint 1   Z
+
+9: front right joint 2  Y
+10: rear left joint 2   Y
+11: rear right joint 2  Y
+
+12: front right joint 3 Y
+13: rear left joint 3   Y
+14: rear right joint 3  Y
+
+*/
+
 function addAnimation(leg, forward) {
     const joint1Anim = new BABYLON.Animation("joint1Anim", "rotation.z", 
     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);

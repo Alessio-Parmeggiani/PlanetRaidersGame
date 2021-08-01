@@ -189,6 +189,21 @@ function createEnemies(){
         enemy.enemy.locallyTranslate(new BABYLON.Vector3(0, 0.5, 0))
         enemies.push(enemy)
     }
+
+    //genrate tank enemy
+    var mesh=assets.assetMeshes.get("enemyTank.babylon");
+    mesh.scaling=new BABYLON.Vector3(0.5,0.5,0.5)
+    enemyType=enemyTankType
+    for(var i=0;i<numFastEnemies;i++) {
+        var position=randomPos(planetRadius)
+        spawningAnimation(position)
+        //taret is player with some randomness
+        var target=player
+        var enemy=new Enemy(mesh,ground,target,enemyType,DEBUG,scene)
+        enemy.spawn(position);
+        enemy.enemy.locallyTranslate(new BABYLON.Vector3(0, 0.5, 0))
+        enemies.push(enemy)
+    }
 }
 
 function endLevel() {
@@ -202,12 +217,12 @@ function endLevel() {
 
 function increaseDifficulty(newEnemies) {
     probFastEnemy +=  1/numNormalEnemies
-    probTankEnemy = probFastEnemy/2
+    probTankEnemy = probFastEnemy/3
     //add 3 enemies
     for(var i=0;i<newEnemies;i++){
         var random=Math.random()
-        if(random>probTankEnemy) numTankEnemies+=1
-        if(random>probFastEnemy) numFastEnemies+=1
+        if(random<probTankEnemy) numTankEnemies+=1
+        else if(random<probFastEnemy) numFastEnemies+=1
         else numNormalEnemies+=1
     }
 }

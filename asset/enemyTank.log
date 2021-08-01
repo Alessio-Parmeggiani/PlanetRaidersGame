@@ -1,0 +1,33 @@
+Exporter version: 2.93.2, Blender version: 2.93.1
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used :
+		Inline textures     :  false
+		Material Type       :  PBR
+		Positions Precision :  4
+		Normals Precision   :  3
+		UVs Precision       :  3
+		Vert Color Precision:  3
+		Mat Weight Precision:  2
+		Keep Z-up r-handed  :  no
+		Texture directory   :  C:\Users\alessio\Desktop\PlanetGameEdit2\asset\
+	Python World class constructor completed
+	WARNING: No active camera has been assigned, or is not in a currently enabled collection
+	processing begun of mesh:  Plane
+		processing begun of material:  Material.002
+		processing begun of material:  Material.001
+		processing begun of material:  Light
+		processing begun of material:  White
+		processing begun of material:  Glass
+		processing begun of multimaterial:  enemyTank.Multimaterial#0
+		num positions      :  3741
+		num normals        :  3741
+		num tangents       :  0
+		num uvs            :  7482
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  5028
+========= Writing of JSON file started =========
+	writing mesh:  Plane
+========= Writing of JSON file completed =========
+========= end of processing =========
+elapsed time:  0 min, 0.45 secs

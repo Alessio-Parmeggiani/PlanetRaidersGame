@@ -33,7 +33,7 @@ class Enemy{
         this.direction=1
 
         // how many times it was hit by a bullet
-        this.life = 10;
+        this.life = enemyLife;
         
         this.healthBar = null;
         
@@ -72,8 +72,16 @@ class Enemy{
       
         this.enemy.checkCollisions = true;
 
-        if(this.enemyType==enemyFastType) this.velocity*=1.2
-        if(this.enemyType==enemyTankType) this.velocity*=0.3
+        if(this.enemyType==enemyFastType) {
+            this.velocity*=1.8
+            this.moveInterval=500
+            this.life=enemyLife/3
+        }
+        else if(this.enemyType==enemyTankType) {
+            this.velocity*=0.3
+            this.moveInterval=5
+            this.life=enemyLife*3
+        }
         //this.enemy.showBoundingBox = true;
     }
 
@@ -118,7 +126,11 @@ class Enemy{
 
         this.accuracy=0.2*remainingEnemies
         if(this.enemyType==enemyFastType) {
-            this.accuracy=(this.accuracy+1)*2
+            this.accuracy=(this.accuracy)*2.5
+
+        }
+        if(this.enemyType==enemyTankType) {
+            this.accuracy=0.1
             //this.nextUpdateTargetTime/=3
         }
 

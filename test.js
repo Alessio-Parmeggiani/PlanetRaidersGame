@@ -110,3 +110,33 @@ var wheelL = BABYLON.MeshBuilder.CreateBox("playerWheelL", {size: 0.8,width: whe
 wheelL.parent = player;
 wheelL.position.x = -(playerWidth/2 + wheelWidth/2);
 */
+
+/*
+var skyMaterial = new BABYLON.SkyMaterial("skyMaterial", scene);
+skyMaterial.backFaceCulling = false;
+
+//Sky material
+var skybox = BABYLON.Mesh.CreateBox("skyBox", 1000.0, scene);
+skybox.material = skyMaterial;
+skyMaterial.turbidity = 20
+//skyMaterial.azimuth = 0.1;
+skyMaterial.inclination = 0.3;
+*/
+/*
+
+// Environment Texture
+var hdrTexture = new BABYLON.HDRCubeTexture("texture/nebula.hdr", scene, 512);
+
+// Skybox
+var hdrSkybox = BABYLON.Mesh.CreateBox("hdrSkyBox", 1000.0, scene);
+var hdrSkyboxMaterial = new BABYLON.PBRMaterial("skyBox", scene);
+hdrSkyboxMaterial.backFaceCulling = false;
+hdrSkyboxMaterial.reflectionTexture = hdrTexture.clone();
+hdrSkyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+hdrSkyboxMaterial.microSurface = 1.1;
+hdrSkyboxMaterial.cameraExposure = 0.8;
+hdrSkyboxMaterial.cameraContrast = 1.6;
+hdrSkyboxMaterial.disableLighting = true;
+hdrSkybox.material = hdrSkyboxMaterial;
+hdrSkybox.infiniteDistance = true;
+*/
