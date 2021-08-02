@@ -41,13 +41,14 @@ var bulletHorizOffset = 0.5;
 var bulletMode = "parallel"
 
 
-var maxPlayerLife=100;
-var playerLife=maxPlayerLife;
+var maxPlayerLife = 100;
+var playerLife = maxPlayerLife;
+var bonusLife = 0;
 var playerSpeed = 150;
-var contactDamage=10
-var newVulnerableTime=new Date().getTime()
+var contactDamage = 10;
+var newVulnerableTime=new Date().getTime();
 //ms of invincibility after contact with enemies
-var invincibleTime=500
+var invincibleTime = 500;
 
 //enemy stats
 var enemyLife=5
@@ -147,7 +148,7 @@ buttons.forEach(button => {
                 icon.src = "icons/Bullets range up.png";
                 break;
             case "Health up":
-                playerLife += 33;
+                bonusLife = 30;
                 icon.src = "icons/Health up.png";
                 const moreHealth = document.createElement("div");
                 moreHealth.id = "moreHealth";
@@ -479,8 +480,14 @@ for(var idx = 0; idx < enemies.length; idx++) {
     //console.log(":"+ newVulnerableTime)
     if(currentTime>newVulnerableTime){
         if (playerHitbox.intersectsMesh(enemies[idx].enemy, false)){
-            playerLife-=contactDamage
-            newVulnerableTime= currentTime+invincibleTime
+            if (bonusLife > 0) {
+                bonusLife -= contactDamage;
+            }
+            else {
+                playerLife -= contactDamage;
+            }
+            decreaseHealthBar();
+            newVulnerableTime = currentTime+invincibleTime;
             console.log("playerLife: "+playerLife)
         }
     }

@@ -232,3 +232,29 @@ function newLevel(){
     createEnemies()
     numEnemies=numNormalEnemies+numFastEnemies+numTankEnemies
 }
+
+function decreaseHealthBar() {
+    var newWidth;
+    if (document.getElementById("moreHealth") != null) {
+        if (bonusLife == 0) {
+            moreHealth.remove();
+        }
+        else {
+            newWidth = bonusLife/100*150;
+            moreHealth.style.width = `${newWidth}px`;
+        }
+    }
+    else {
+        newWidth = playerLife/100*150;
+        playerHealth.style.width = `${newWidth}px`;
+
+        if (newWidth < 150*(0.75) && newWidth > 150*(0.5)) {
+            playerHealth.style.background = "#ffcc00";
+            playerHealth.style.boxShadow = "0px 0px 3px 2px #ffcc00";
+        }
+        else if (newWidth < 150*(0.5)) {
+            playerHealth.style.background = "#ff0000";
+            playerHealth.style.boxShadow = "0px 0px 3px 2px #ff0000";
+        }
+    }
+}
