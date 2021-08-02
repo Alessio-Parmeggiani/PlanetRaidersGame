@@ -194,7 +194,7 @@ function createEnemies(){
     var mesh=assets.assetMeshes.get("enemyTank.babylon");
     mesh.scaling=new BABYLON.Vector3(0.5,0.5,0.5)
     enemyType=enemyTankType
-    for(var i=0;i<numFastEnemies;i++) {
+    for(var i=0;i<numTankEnemies;i++) {
         var position=randomPos(planetRadius)
         spawningAnimation(position)
         //taret is player with some randomness

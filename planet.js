@@ -16,8 +16,8 @@ var createDefaultEngine = function() {
 
 
 //
-var pi=Math.PI;
-var framerate=60
+var pi = Math.PI;
+var framerate = 60;
 
 //gameplay stats
 var PLAYERMOVE = false;
@@ -51,25 +51,25 @@ var newVulnerableTime=new Date().getTime();
 var invincibleTime = 500;
 
 //enemy stats
-var enemyLife=5
-var numNormalEnemies=2
-var numFastEnemies=1
-var numTankEnemies=1
+var enemyLife=5;
+var numNormalEnemies=2;
+var numFastEnemies=1;
+var numTankEnemies=1;
 
-var probTankEnemy=0
-var probFastEnemy=0
+var probTankEnemy=0;
+var probFastEnemy=0;
 
-var numEnemies=numNormalEnemies+numFastEnemies+numTankEnemies
-var remainingEnemies=numEnemies
+var numEnemies=numNormalEnemies+numFastEnemies+numTankEnemies;
+var remainingEnemies=numEnemies;
 
 //duration of spawning animation
-var spawnDurationTime=3000 //ms
-var spawnDurationFrame=framerate*(spawnDurationTime/1000)
+var spawnDurationTime=3000; //ms
+var spawnDurationFrame=framerate*(spawnDurationTime/1000);
 
 
-var enemyNormalType=1
-var enemyFastType=2
-var enemyTankType=3
+var enemyNormalType=1;
+var enemyFastType=2;
+var enemyTankType=3;
 
 //other stats
 var planetDiameter = 6;
@@ -80,7 +80,7 @@ const assets = {
     assetMeshes : new Map(),
 }
 
-var playerAsset=[]
+var playerAsset=[];
 
 //assets needed later
 const assetsPath = [
@@ -108,6 +108,8 @@ var animating = false;
 var forward = true;
 var previous_forward = true;
 var animations = [];
+
+var fps = document.getElementById("fps");
 
 // ------- BUTTON MANAGER -------
 const buttons = Array.from(document.getElementsByTagName("button"));
@@ -145,7 +147,7 @@ buttons.forEach(button => {
                 break;
             case "Bullets range up":
                 bulletRange += 0.5;
-                icon.src = "icons/Bullets range up.png";
+                icon.src = "icons/Range up.png";
                 break;
             case "Health up":
                 bonusLife = 30;
@@ -174,7 +176,7 @@ buttons.forEach(button => {
 //
 function main(){
     
-var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, 1.2, 10, new BABYLON.Vector3(0, 0, 0), scene);
+var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, 1.2, 10, new BABYLON.Vector3(0, 0, -3), scene);
 
 //mainly for debug, control rotation of camera with mouse
 camera.attachControl();
@@ -239,6 +241,7 @@ var sunMaterial = new BABYLON.StandardMaterial("sunMat", scene);
 sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
 sun.material=sunMaterial
 
+/*
 var gl = new BABYLON.GlowLayer("glow", scene);
 gl.intensity = 0.7;
 gl.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
@@ -248,10 +251,11 @@ gl.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
         result.set(0, 0, 0, 0);
     }
 }
+//gl.addIncludedOnlyMesh(sun);
 
 var hl = new BABYLON.HighlightLayer("hl1", scene);
 hl.addMesh(sun,new BABYLON.Color3(1,0.5,0));
-
+*/
 //some debug utilities
 if (DEBUG) {
     //ground.showBoundingBox = true
@@ -409,6 +413,8 @@ if ((inputMap["h"] || inputMap["e"]) && currentTime > nextBulletTime) {
 //compute bullet position and collision
 scene.registerBeforeRender(function () {
 
+fps.innerHTML = engine.getFps().toFixed() + "fps";
+
 var currentTime=new Date().getTime()
 //console.log(bullets)
 for (var idx = 0; idx < bullets.length; idx++) {
@@ -488,7 +494,7 @@ for(var idx = 0; idx < enemies.length; idx++) {
             }
             decreaseHealthBar();
             newVulnerableTime = currentTime+invincibleTime;
-            console.log("playerLife: "+playerLife)
+            //console.log("playerLife: "+playerLife)
         }
     }
 }

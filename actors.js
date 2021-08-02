@@ -67,8 +67,6 @@ class Enemy{
         //fadeInAnimation(this.enemy,180)
 
         if(position.x>0) this.direction=-1
-
-        this.healthBar = new HealthBar(this.enemy, this.scene,true,this.life);
       
         this.enemy.checkCollisions = true;
 
@@ -82,6 +80,8 @@ class Enemy{
             this.moveInterval=5
             this.life=enemyLife*3
         }
+
+        this.healthBar = new HealthBar(this.enemy, this.scene,true,this.life);
         //this.enemy.showBoundingBox = true;
     }
 
@@ -338,9 +338,9 @@ class HealthBar {
         this.mesh.material.emissiveColor = new BABYLON.Color3(0, 1, 0);
         for(var l=0;l<lights.length;l++) lights[l].excludedMeshes.push(this.mesh);
         
-        var gl = new BABYLON.GlowLayer("glow", scene);
-        gl.intensity = 0.3;
-        gl.addIncludedOnlyMesh(this.mesh);
+        //var gl = new BABYLON.GlowLayer("glow", scene);
+        //gl.intensity = 0.3;
+        //gl.addIncludedOnlyMesh(this.mesh);
 
         // to make the healthbar always face the camera
         //this.mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Z || BABYLON.Mesh.BILLBOARDMODE_X;
@@ -364,7 +364,7 @@ class HealthBar {
             this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
         
         else if (this.mesh.scaling.y <= 0){
-            this.mesh.dispose();
+            this.mesh.dispose(false, true);
         }
 
     }

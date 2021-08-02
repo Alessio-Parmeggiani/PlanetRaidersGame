@@ -366,12 +366,12 @@ function spawningAnimation(position) {
     });
 
     anim1.setKeys(keyFrames);
-    var spawnAnim1=scene.beginDirectAnimation(cylinder, [anim1], 0,  spawnDurationFrame, true);
-    spawnAnim1.onAnimationEnd=function() { cylinder.dispose()   }
-    var spawnAnim2=scene.beginDirectAnimation(ring1, [anim1], 0,  spawnDurationFrame, true);
-    spawnAnim2.onAnimationEnd=function() { ring1.dispose()   }
-    var spawnAnim3=scene.beginDirectAnimation(ring2, [anim1], 0,  spawnDurationFrame, true);
-    spawnAnim3.onAnimationEnd=function() { ring2.dispose()   }
+    var spawnAnim1=scene.beginDirectAnimation(cylinder, [anim1], 0,  spawnDurationFrame, false);
+    spawnAnim1.onAnimationEnd=function() { cylinder.dispose(false, true); }
+    var spawnAnim2=scene.beginDirectAnimation(ring1, [anim1], 0,  spawnDurationFrame, false);
+    spawnAnim2.onAnimationEnd=function() { ring1.dispose(); }
+    var spawnAnim3=scene.beginDirectAnimation(ring2, [anim1], 0,  spawnDurationFrame, false);
+    spawnAnim3.onAnimationEnd=function() { ring2.dispose(); }
 
 
 }

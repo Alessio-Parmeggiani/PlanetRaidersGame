@@ -257,3 +257,12 @@ span.success {
     display: flex;
     flex-direction: row-reverse;
 }
+
+#fps {
+    position: absolute;
+    bottom: 15px;
+    left: 30px;
+    width: 60px;
+    height: 20px;
+    text-align: left;
+}
