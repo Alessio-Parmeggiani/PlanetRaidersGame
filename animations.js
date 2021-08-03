@@ -252,7 +252,7 @@ function cannonShoot() {
 
     var pos=cannon.position.y
     var rot=cannon.rotation.y
-    console.log(pos)
+    
 
     
     const cannonAnim = new BABYLON.Animation("cannonAnim", "rotation.y", 
@@ -304,46 +304,40 @@ function cannonShoot() {
 
 
 function spawningAnimation(position) {
-    var cylinder = BABYLON.MeshBuilder.CreateCylinder("spawnAnimation",{height: 1}, scene);
-    //var cylinder=assets.assetMeshes.get("teleport.babylon").createInstance();
-    
-    console.log(cylinder)
-    cylinder.position=position
-    //cylinder.scaling.y=0.08
-    //cylinder.rotation.z=Math.PI/4
-    //cylinder.visibility=0
-    
-    
-    orientSurface(cylinder,position,ground)
-    cylinder.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
     var material = new BABYLON.StandardMaterial("mat", scene);
     material.emissiveColor = new BABYLON.Color3(0.2, 0.6, 1);
     material.diffuseTexture = new BABYLON.Texture("texture/effect.png", scene);
-    
-    //material.diffuseTexture.hasAlpha = true;
     material.opacityTexture=new BABYLON.Texture("texture/blend.png", scene);
     material.opacityTexture.wAng = -Math.PI/2; 
+
     
-    cylinder.material=material
+    var cylinder = BABYLON.MeshBuilder.CreateCylinder("spawnAnimation",{height: 1}, scene);
+    cylinder.position=position
+    orientSurface(cylinder,position,ground)
+    cylinder.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
+    cylinder.setParent(ground)
 
     var ring1 = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.1,diameter:1.2},scene);
     orientSurface(ring1,position,ground)
     ring1.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
-    ring1.material=material
-   
-    scene.registerBeforeRender(function () {
-        ring1.rotation.y+=0.3
-        
-    })
+    ring1.setParent(cylinder)
 
     var ring2 = BABYLON.MeshBuilder.CreateTorus("torus", {thickness: 0.1,diameter:1.2},scene);
     orientSurface(ring2,position,ground)
     ring2.locallyTranslate(new BABYLON.Vector3(0,0.5,0))
+    ring2.setParent(cylinder)
+    
+    cylinder.material=material
+    ring1.material=material
     ring2.material=material
 
     scene.registerBeforeRender(function () {
-        ring2.rotation.x-=0.2
+        ring1.rotation.y+=0.3  
+        ring2.rotation.x-=0.2  
     })
+
+
+
 
     var frameRate=60
     var anim1 = new BABYLON.Animation("rising", "visibility",
@@ -367,11 +361,11 @@ function spawningAnimation(position) {
 
     anim1.setKeys(keyFrames);
     var spawnAnim1=scene.beginDirectAnimation(cylinder, [anim1], 0,  spawnDurationFrame, false);
-    spawnAnim1.onAnimationEnd=function() { cylinder.dispose(false, true); }
+    spawnAnim1.onAnimationEnd=function() { cylinder.dispose(true, true); }
     var spawnAnim2=scene.beginDirectAnimation(ring1, [anim1], 0,  spawnDurationFrame, false);
-    spawnAnim2.onAnimationEnd=function() { ring1.dispose(); }
+    spawnAnim2.onAnimationEnd=function() { ring1.dispose(true,true); }
     var spawnAnim3=scene.beginDirectAnimation(ring2, [anim1], 0,  spawnDurationFrame, false);
-    spawnAnim3.onAnimationEnd=function() { ring2.dispose(); }
+    spawnAnim3.onAnimationEnd=function() { ring2.dispose(true,true); }
 
 
 }

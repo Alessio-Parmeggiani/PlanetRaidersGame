@@ -81,7 +81,7 @@ class Enemy{
             this.life=enemyLife*3
         }
 
-        this.healthBar = new HealthBar(this.enemy, this.scene,true,this.life);
+        this.healthBar = new HealthBar(this.enemy, this.scene,this.life);
         //this.enemy.showBoundingBox = true;
     }
 
@@ -237,8 +237,10 @@ class Bullet{
         particles.maxSize=0.2
         
         //optimization if many bullets
-        var emitRate= 300/( (bulletArcCount+bulletParallelCount)/3 );
-        if(emitRate<50) particles.emitRate = 50
+        var emitRate= 300/( (bulletArcCount+bulletParallelCount));
+
+        //minimum of 20 
+        if(emitRate<20) particles.emitRate = 20
         particles.emitRate =emitRate
         
         particles.startPositionFunction = (worldMatrix, positionToUpdate, particle, isLocal) => {
@@ -309,13 +311,13 @@ class Bullet{
 }
 
 class HealthBar {
-    constructor(player, scene, enemy=true,life) {
-        this.player = player;
+    constructor(enemy, scene, life) {
+        this.enemy = enemy;
 
         this.mesh = BABYLON.MeshBuilder.CreateCylinder("healthbar",
             {height: 0.8, diameter: 0.15}, scene);
 
-        this.mesh.parent = player;
+        this.mesh.parent = this.enemy;
 
         this.startLife=life
         this.remainingLife=life
@@ -324,33 +326,21 @@ class HealthBar {
         this.yellowThreshold=0.5
         this.redThreshold=0.3
 
-        if (enemy) {
-            this.mesh.position.y= player.getBoundingInfo().boundingBox.extendSize.z*1.4
-        }
-        else {
-            this.mesh.position.z = -0.5;
-            this.mesh.position.y-=1
-        }
-        
+        this.mesh.position.y += this.enemy.getBoundingInfo().boundingBox.extendSize.y*2+0.3
         this.mesh.rotation.z = pi/2;
 
         this.mesh.material = new BABYLON.StandardMaterial("healthbar", scene);
         this.mesh.material.emissiveColor = new BABYLON.Color3(0, 1, 0);
         for(var l=0;l<lights.length;l++) lights[l].excludedMeshes.push(this.mesh);
         
-        //var gl = new BABYLON.GlowLayer("glow", scene);
-        //gl.intensity = 0.3;
-        //gl.addIncludedOnlyMesh(this.mesh);
-
-        // to make the healthbar always face the camera
-        //this.mesh.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Z || BABYLON.Mesh.BILLBOARDMODE_X;
+        glowLayer.addIncludedOnlyMesh(this.mesh);
     }
 
     whenHit(damage) {
         this.remainingLife-=damage
         //remaining:full health = scaling : 1 (full bar)
         //scaling=remaining/full Health
-        console.log(this.remainingLife/this.startLife)
+        //console.log(this.remainingLife/this.startLife)
         this.mesh.scaling.y = this.remainingLife/this.startLife;
 
 

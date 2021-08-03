@@ -129,7 +129,7 @@ function bulletGen(mesh,bulletCount=1,shooter=null,ground,
             //don't shoot central bullet
         }
         else {
-            console.log("spawning"+i)
+            
             bullet=new Bullet(mesh,shooter,ground,scene)
             bullet.spawn(dir)
             projectiles.push(bullet);
@@ -231,6 +231,8 @@ function newLevel(){
     increaseDifficulty(3)
     createEnemies()
     numEnemies=numNormalEnemies+numFastEnemies+numTankEnemies
+
+    
 }
 
 function decreaseHealthBar() {

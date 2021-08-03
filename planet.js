@@ -9,6 +9,8 @@ var scene = null;
 var ground = null;
 var player = null;
 
+var glowLayer=null
+
 var sceneToRender = null;
 var createDefaultEngine = function() { 
     return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false});
@@ -30,7 +32,16 @@ var wheelWidth = 0.5;
 var attackSpeed = 300;
 var rotationSpeed = Math.PI / 100;
 
+var maxPlayerLife = 100;
+var playerLife = maxPlayerLife;
+var bonusLife = 0;
+var playerSpeed = 150;
+var contactDamage = 10;
+var newVulnerableTime=new Date().getTime();
+//ms of invincibility after contact with enemies
+var invincibleTime = 500;
 
+//bullets stats
 var bulletRange = 1;    // num of revolutions around the planet
 var bulletSpeed = Math.PI / 100;
 var bulletHeight = 1;
@@ -41,18 +52,11 @@ var bulletHorizOffset = 0.5;
 var bulletMode = "parallel"
 
 
-var maxPlayerLife = 100;
-var playerLife = maxPlayerLife;
-var bonusLife = 0;
-var playerSpeed = 150;
-var contactDamage = 10;
-var newVulnerableTime=new Date().getTime();
-//ms of invincibility after contact with enemies
-var invincibleTime = 500;
-
 //enemy stats
 var enemyLife=5;
-var numNormalEnemies=2;
+
+//number of enemies
+var numNormalEnemies=1;
 var numFastEnemies=1;
 var numTankEnemies=1;
 
@@ -66,13 +70,13 @@ var remainingEnemies=numEnemies;
 var spawnDurationTime=3000; //ms
 var spawnDurationFrame=framerate*(spawnDurationTime/1000);
 
-
+//don't modify: ID of enemy types
 var enemyNormalType=1;
 var enemyFastType=2;
 var enemyTankType=3;
 
 //other stats
-var planetDiameter = 6;
+var planetDiameter = 9;
 var planetRadius = planetDiameter/2;
 
 //assets
@@ -179,8 +183,12 @@ function main(){
 var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, 1.2, 10, new BABYLON.Vector3(0, 0, -3), scene);
 
 //mainly for debug, control rotation of camera with mouse
-camera.attachControl();
+//if(DEBUG) 
+    camera.attachControl();
 camera.wheelPrecision = 45;
+
+glowLayer = new BABYLON.GlowLayer("glow", scene);
+glowLayer.intensity = 0.7;
 
 //var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-1, -1, 1), scene);
@@ -234,28 +242,55 @@ planetMaterial.bumpTexture.vScale=10
 planetMaterial.bumpTexture.level=0.4
 ground.material = planetMaterial;
 
-
+/*
 sun = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 30, segments: 32 }, scene);
 sun.position=new BABYLON.Vector3(100,0,300)
 var sunMaterial = new BABYLON.StandardMaterial("sunMat", scene);
 sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
 sun.material=sunMaterial
+*/
+
+// Skybox
+var skybox = BABYLON.Mesh.CreateBox('SkyBox', 1000, scene, false, BABYLON.Mesh.BACKSIDE);
+skybox.material = new BABYLON.SkyMaterial('sky', scene);
+skybox.material.inclination =-0.2;
+skybox.material.useSunPosition=true
+skybox.material.sunPosition=new BABYLON.Vector3(100,300,300)
+skybox.material.turbidity=50
+
+
 
 /*
-var gl = new BABYLON.GlowLayer("glow", scene);
-gl.intensity = 0.7;
-gl.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
+var colors = [];
+var numVertices = skybox.getTotalVertices();
+
+for (let i = 0; i < numVertices/3; ++i) {
+    colors.push(0.3, 0.2, 0.6, 1);
+    colors.push(0.6, 0.1, 0.6, 1);
+    colors.push(0.8, 0.6, 0.2, 1);
+}
+
+skybox.setVerticesData("color", colors);
+*/
+scene.registerBeforeRender(function () {
+//box.material.inclination +=0.01;
+})
+
+/*
+glowLayer.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
     if (mesh.name === "sun") {
         result.set(1, 0.8, 0, 1);
     } else {
         result.set(0, 0, 0, 0);
     }
 }
-//gl.addIncludedOnlyMesh(sun);
-
-var hl = new BABYLON.HighlightLayer("hl1", scene);
-hl.addMesh(sun,new BABYLON.Color3(1,0.5,0));
 */
+//gl.addIncludedOnlyMesh(sun);
+/*
+var highlightLayer = new BABYLON.HighlightLayer("hl1", scene);
+highlightLayer.addMesh(sun,new BABYLON.Color3(1,0.5,0));
+*/
+
 //some debug utilities
 if (DEBUG) {
     //ground.showBoundingBox = true
@@ -302,7 +337,11 @@ if (inputMap["w"] || inputMap["ArrowUp"]) {
     dir.normalize();
     
     if (PLAYERMOVE) playerPivot.rotate(dir, Math.PI / playerSpeed, BABYLON.Space.WORLD);  // the player moves, the planet stays still
-    else ground.rotate(dir, -Math.PI / playerSpeed, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
+    else {
+        ground.rotate(dir, -Math.PI / playerSpeed, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
+        //skybox.rotate(dir, -Math.PI / playerSpeed, BABYLON.Space.WORLD);   
+
+    }
     positionUpdated=true
 
     forward = true;
@@ -379,9 +418,6 @@ if (!inputMap["w"] && !inputMap["ArrowUp"] &&
 //shoot
 const currentTime = new Date().getTime();
 if ((inputMap["h"] || inputMap["e"]) && currentTime > nextBulletTime) {
-    
-    //avoid singular case
-    console.log(player.rotation.z)
 
     //avoid gimbal lock
     if (player.rotation.z == 0) player.rotation.z += 0.01;
