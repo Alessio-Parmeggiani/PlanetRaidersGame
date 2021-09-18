@@ -124,6 +124,7 @@ const upgrade = document.getElementById("upgrade");
 const upgradeList = document.getElementById("upgradeList");
 const bar = document.getElementById("bar");
 const playerHealth = document.getElementById("playerHealth");
+const splash = document.getElementById("back");
 var chosen_upgrade;
 
 buttons.forEach(button => {
@@ -161,6 +162,15 @@ buttons.forEach(button => {
                 moreHealth.style.left = 30 + playerHealth.offsetWidth + "px";
                 bar.appendChild(moreHealth);
                 break;
+            case "Play":
+                splash.addEventListener("transitionend", (event) => {
+                    // condition needed to ignore the play button transition
+                    if (event.target.id == "back") {
+                        splash.remove();
+                    }
+                })
+                splash.classList.add("removed");
+                return;
         }
         congrats.classList.remove("anim-first");
         message.classList.remove("anim-first");
@@ -417,7 +427,7 @@ if (!inputMap["w"] && !inputMap["ArrowUp"] &&
 
 //shoot
 const currentTime = new Date().getTime();
-if ((inputMap["h"] || inputMap["e"]) && currentTime > nextBulletTime) {
+if ((inputMap[" "] || inputMap["e"]) && currentTime > nextBulletTime) {
 
     //avoid gimbal lock
     if (player.rotation.z == 0) player.rotation.z += 0.01;

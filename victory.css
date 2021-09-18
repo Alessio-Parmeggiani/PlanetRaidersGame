@@ -115,7 +115,7 @@ button {
     margin: 20px 20px;
     border: 4px solid white;
     background-color: transparent;
-    transition: 0.3s ease;
+    transition: 0.2s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -219,7 +219,7 @@ span.success {
 #heart {
     position: absolute;
     filter: invert(18%) sepia(78%) saturate(7331%) hue-rotate(357deg)
-     brightness(104%) contrast(115%) drop-shadow(0px 0px 5px #ff0000);
+    brightness(104%) contrast(115%) drop-shadow(0px 0px 5px #ff0000);
     top: 10px;
     left: 11px;
     height: 40px;
@@ -265,4 +265,93 @@ span.success {
     width: 60px;
     height: 20px;
     text-align: left;
+}
+
+#back {
+    background-image: url("texture/gradient.jpg");
+    z-index: 4;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#img_container {
+    display: flex;
+    justify-content: center;
+}
+
+#splash_planet {
+    align-self: center;
+}
+
+.title {
+    position: relative;
+}
+
+#button_container {
+    display: flex;
+    justify-content: center;
+}
+
+h1#title {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 140px;
+    font-weight: 300;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#button {
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: 400;
+    font-size: 40px;
+    font-style: normal;
+    height: auto;
+    margin: 0px;
+    border: 3px solid white;
+    text-transform: none;
+}
+
+#keys_container {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+    transform: scale(0.9);
+}
+
+.key {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 140px 0 140px;
+    width: 50%;
+}
+
+.key#left {
+    justify-content: flex-end;
+}
+
+.key#right {
+    justify-content: flex-start;
+    border-left: 2px white solid;
+}
+
+.key_image {
+    margin: 0 30px 0 30px;
+}
+
+.key_image#e {
+    margin-left: 0px;
+}
+
+.key_text {
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 40px;
+    font-weight: 200;
+}
+
+.removed {
+    transition: opacity 1s linear;
+    opacity: 0;
 }
