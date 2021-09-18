@@ -20,6 +20,7 @@ var createDefaultEngine = function() {
 //
 var pi = Math.PI;
 var framerate = 60;
+var stepCounter = 0;
 
 //gameplay stats
 var PLAYERMOVE = false;
@@ -35,7 +36,7 @@ var rotationSpeed = Math.PI / 100;
 var maxPlayerLife = 100;
 var playerLife = maxPlayerLife;
 var bonusLife = 0;
-var playerSpeed = 150;
+var playerSpeed = 200;
 var contactDamage = 10;
 var newVulnerableTime=new Date().getTime();
 //ms of invincibility after contact with enemies
@@ -126,6 +127,7 @@ const bar = document.getElementById("bar");
 const playerHealth = document.getElementById("playerHealth");
 const splash = document.getElementById("back");
 var chosen_upgrade;
+var newLevelSound;
 
 buttons.forEach(button => {
     button.onclick = function() {
@@ -135,7 +137,7 @@ buttons.forEach(button => {
         console.log(chosen_upgrade);
         switch (chosen_upgrade) {
             case "Player speed up":
-                playerSpeed -= 50;
+                playerSpeed /= 2;
                 icon.src = "icons/Speed up.png";
                 break;
             case "Bullets +1":
@@ -180,7 +182,8 @@ buttons.forEach(button => {
         upgradeList.appendChild(icon);
 
         //numEnemies += 3;
-        newLevel()
+        newLevelSound.play();
+        newLevel();
         //createEnemies(light); I can't because the light still isn't defined
     }
 })
@@ -205,6 +208,14 @@ var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3
 light.intensity = 0.8;
 lights.push(light)
 
+// SOUNDS
+var rocketLaunch = new BABYLON.Sound("rocketLaunch", "sounds/Space-Cannon.mp3", scene);
+var step = new BABYLON.Sound("step", "sounds/Robot-Footstep_4.mp3", scene);
+var enemyHit = new BABYLON.Sound("enemyHit", "sounds/POL-metal-slam-03.wav", scene);
+var playerHit = new BABYLON.Sound("playerHit", "sounds/POL-metal-slam-02.wav", scene);
+var endLevelSound = new BABYLON.Sound("endLevelSound", "sounds/POL-digital-impact-03.wav", scene);
+var enemyDead = new BABYLON.Sound("enemyDead", "sounds/POL-digital-impact-08.wav", scene);
+newLevelSound = new BABYLON.Sound("newLevelSound", "sounds/POL-digital-impact-02.wav", scene);
 
 
 
@@ -346,6 +357,9 @@ if (inputMap["w"] || inputMap["ArrowUp"]) {
     var dir = player.getDirection(forward);
     dir.normalize();
     
+    stepCounter++;
+    if (stepCounter%(16*playerSpeed/200) == 0) step.play();
+    
     if (PLAYERMOVE) playerPivot.rotate(dir, Math.PI / playerSpeed, BABYLON.Space.WORLD);  // the player moves, the planet stays still
     else {
         ground.rotate(dir, -Math.PI / playerSpeed, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
@@ -371,6 +385,13 @@ if (inputMap["a"] || inputMap["ArrowLeft"]) {
     //wheelR.rotation.x += 0.05;
     //wheelL.rotation.x -= 0.05;
     player.rotation.z += rotationSpeed;
+
+    if (!inputMap["w"] && !inputMap["ArrowUp"] &&
+        !inputMap["s"] && !inputMap["ArrowDown"]) {
+        stepCounter++;
+        if (stepCounter%(16*playerSpeed/200) == 0) step.play();
+    }
+
     if(!rotatingLeft) {
         //walk("R",1)
         rotatingLeft=true
@@ -385,9 +406,12 @@ if (inputMap["s"] || inputMap["ArrowDown"]) {
     var forward = new BABYLON.Vector3(1, 0, 0);		
     var dir = player.getDirection(forward);
     dir.normalize();
+    
+    stepCounter++;
+    if (stepCounter%(16*playerSpeed/200) == 0) step.play();
      
-    if (PLAYERMOVE) playerPivot.rotate(dir, -Math.PI / 150, BABYLON.Space.WORLD);
-    else ground.rotate(dir, Math.PI / 150, BABYLON.Space.WORLD);
+    if (PLAYERMOVE) playerPivot.rotate(dir, -Math.PI / playerSpeed, BABYLON.Space.WORLD);
+    else ground.rotate(dir, Math.PI / playerSpeed, BABYLON.Space.WORLD);
     positionUpdated=true
 
     forward = false;
@@ -407,6 +431,12 @@ if (inputMap["d"] || inputMap["ArrowRight"]) {
     //wheelR.rotation.x -= 0.05;
     //wheelL.rotation.x += 0.05;
     player.rotation.z -= rotationSpeed;
+
+    if (!inputMap["w"] && !inputMap["ArrowUp"] &&
+        !inputMap["s"] && !inputMap["ArrowDown"]) {
+        stepCounter++;
+        if (stepCounter%(16*playerSpeed/200) == 0) step.play();
+    }
 
     if (startAnimation(animating, forward)) animating = true;
 }
@@ -434,6 +464,7 @@ if ((inputMap[" "] || inputMap["e"]) && currentTime > nextBulletTime) {
     var mesh=assets.assetMeshes.get("rocket.babylon");
     //shoot parallel bullets
     cannonShoot()
+    rocketLaunch.play();
     bulletMode="parallel"
     var projectiles=bulletGen(mesh,bulletParallelCount,player,ground,
         bulletMode,bulletAngleOffset,bulletHorizOffset, bulletRange, bulletSpeed, scene)
@@ -500,14 +531,17 @@ for (var idx = 0; idx < bullets.length; idx++) {
     for (let j=0; j<enemies.length; j++) {
         if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
             console.log("enemy hit");
+            enemyHit.play();
             dead=enemies[j].whenHit(bullet.damage);
             if (dead) {
                 enemies.splice(j, 1);
                 remainingEnemies=enemies.length
+                enemyDead.play();
             }
 
             if (enemies.length == 0) {
                 console.log("all enemies dead");
+                endLevelSound.play();
                 endLevel();
             }
             
@@ -532,6 +566,7 @@ for(var idx = 0; idx < enemies.length; idx++) {
     //console.log(":"+ newVulnerableTime)
     if(currentTime>newVulnerableTime){
         if (playerHitbox.intersectsMesh(enemies[idx].enemy, false)){
+            playerHit.play();
             if (bonusLife > 0) {
                 bonusLife -= contactDamage;
             }
