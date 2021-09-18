@@ -39,6 +39,8 @@ class Enemy{
         
         this.enemyType=enemyType 
 
+        this.dying=false
+
         this.DEBUG=DEBUG
 
     }
@@ -161,14 +163,8 @@ class Enemy{
     whenHit(damage) {
         this.life-=damage
         this.healthBar.whenHit(damage)
-        if (this.life <= 0) {
-            this.enemy.dispose();
-            return 1;
-        }
-        else {
-            this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
-            return 0;
-        }
+        if (this.life <= 0) this.dying=true
+        else  this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
     }
   
 }

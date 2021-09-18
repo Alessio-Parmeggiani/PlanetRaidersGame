@@ -473,7 +473,7 @@ for (var idx = 0; idx < bullets.length; idx++) {
     var bulletFall=false;
     if(bulletHeight<=planetRadius+bulletMesh.getBoundingInfo().boundingBox.extendSize.x) bulletFall=true  ;
     //bulletFall=false
-
+    
     //collision bullet-ground
     if (bulletFall) {
         bulletMesh.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
@@ -486,66 +486,77 @@ for (var idx = 0; idx < bullets.length; idx++) {
     collidingObjects.forEach(objects => {
         for( var i=0; i<objects.length;i++){
             if (bulletMesh.intersectsMesh(objects[i], false)){
-                
-                
                 bulletMesh.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
                 objects[i].dispose();
                 objects.splice(i,1);  
             }
         }
     })
-    
     //collision bullet-enemies 
     for (let j=0; j<enemies.length; j++) {
         if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
-            console.log("enemy hit");
-            enemyHit.play();
-            dead=enemies[j].whenHit(bullet.damage);
-            if (dead) {
-                enemies.splice(j, 1);
-                remainingEnemies=enemies.length
-                enemyDead.play();
-            }
 
-            if (enemies.length == 0) {
-                console.log("all enemies dead");
-                endLevelSound.play();
-                endLevel();
-            }
-            
+            //enemy hit
+            enemyHit.play();
+            enemies[j].whenHit(bullet.damage);
+
+            //delete bullet
             bulletMesh.dispose();
             pivot.dispose();
             bullets.splice(idx, 1);
-            break
         }
     }
     
 }
 
 for(var idx = 0; idx < enemies.length; idx++) {
-    //move enemies
-    enemies[idx].moveStep()
-    positionUpdated=true
-    if(positionUpdated) {
-        enemies[idx].updatePosition()
-    }
+    //if enemy is alive then move
+    if (!enemies[idx].dying) {
+        enemies[idx].moveStep()
 
-    //collision enemy-player
-    //console.log(":"+ newVulnerableTime)
-    if(currentTime>newVulnerableTime){
-        if (playerHitbox.intersectsMesh(enemies[idx].enemy, false)){
-            playerHit.play();
-            if (bonusLife > 0) {
-                bonusLife -= contactDamage;
+        positionUpdated=true
+        if(positionUpdated) {
+            enemies[idx].updatePosition()
+        }
+
+        //collision enemy-player
+        if(currentTime>newVulnerableTime){
+            if (playerHitbox.intersectsMesh(enemies[idx].enemy, false)){
+                playerHit.play();
+                if (bonusLife > 0) {
+                    bonusLife -= contactDamage;
+                }
+                else {
+                    playerLife -= contactDamage;
+                }
+                decreaseHealthBar();
+                newVulnerableTime = currentTime+invincibleTime;
+                //console.log("playerLife: "+playerLife)
             }
-            else {
-                playerLife -= contactDamage;
-            }
-            decreaseHealthBar();
-            newVulnerableTime = currentTime+invincibleTime;
-            //console.log("playerLife: "+playerLife)
         }
     }
+
+    //enemy is performing death animation
+    else {
+        //fall
+        enemies[idx].enemy.locallyTranslate(new BABYLON.Vector3(0, -0.008, 0))
+        enemies[idx].enemy.rotation.y+=0.01
+
+        enemyHeight=BABYLON.Vector3.Distance(enemies[idx].enemy.getAbsolutePosition(),ground.position)
+        if(enemyHeight<=planetRadius+(mesh.getBoundingInfo().boundingBox.extendSize.x)/2) {
+            enemies[idx].enemy.dispose()
+            enemies.splice(idx, 1);
+            enemyDead.play();
+            console.log("enemy dead")
+            remainingEnemies=enemies.length
+            if (enemies.length == 0) {
+                console.log("all enemies dead");
+                endLevelSound.play();
+                endLevel();
+            }
+        }
+    }
+
 }
 positionUpdated=false
 
