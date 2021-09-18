@@ -26,6 +26,7 @@ var stepCounter = 0;
 var PLAYERMOVE = false;
 var DEBUG = false;
 
+
 //player stats
 var playerWidth = 0.75;
 var wheelWidth = 0.5;
@@ -57,9 +58,9 @@ var bulletMode = "parallel"
 var enemyLife=5;
 
 //number of enemies
-var numNormalEnemies=1;
-var numFastEnemies=1;
-var numTankEnemies=1;
+var numNormalEnemies=0;
+var numFastEnemies=0;
+var numTankEnemies=0;
 
 var probTankEnemy=0;
 var probFastEnemy=0;
@@ -169,6 +170,7 @@ buttons.forEach(button => {
                     // condition needed to ignore the play button transition
                     if (event.target.id == "back") {
                         splash.remove();
+                        newLevel()
                     }
                 })
                 splash.classList.add("removed");
@@ -263,13 +265,6 @@ planetMaterial.bumpTexture.vScale=10
 planetMaterial.bumpTexture.level=0.4
 ground.material = planetMaterial;
 
-/*
-sun = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 30, segments: 32 }, scene);
-sun.position=new BABYLON.Vector3(100,0,300)
-var sunMaterial = new BABYLON.StandardMaterial("sunMat", scene);
-sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
-sun.material=sunMaterial
-*/
 
 // Skybox
 var skybox = BABYLON.Mesh.CreateBox('SkyBox', 1000, scene, false, BABYLON.Mesh.BACKSIDE);
@@ -281,36 +276,7 @@ skybox.material.turbidity=50
 
 
 
-/*
-var colors = [];
-var numVertices = skybox.getTotalVertices();
 
-for (let i = 0; i < numVertices/3; ++i) {
-    colors.push(0.3, 0.2, 0.6, 1);
-    colors.push(0.6, 0.1, 0.6, 1);
-    colors.push(0.8, 0.6, 0.2, 1);
-}
-
-skybox.setVerticesData("color", colors);
-*/
-scene.registerBeforeRender(function () {
-//box.material.inclination +=0.01;
-})
-
-/*
-glowLayer.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
-    if (mesh.name === "sun") {
-        result.set(1, 0.8, 0, 1);
-    } else {
-        result.set(0, 0, 0, 0);
-    }
-}
-*/
-//gl.addIncludedOnlyMesh(sun);
-/*
-var highlightLayer = new BABYLON.HighlightLayer("hl1", scene);
-highlightLayer.addMesh(sun,new BABYLON.Color3(1,0.5,0));
-*/
 
 //some debug utilities
 if (DEBUG) {
@@ -321,9 +287,11 @@ if (DEBUG) {
 
 
 //---------POPULATE PLANET---------------
+
 var mesh=assets.assetMeshes.get("grass.babylon")
 uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
-createEnemies(light);
+//createEnemies(light);
+
 
 // ------------ SHOW UI -----------------
 

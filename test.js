@@ -140,3 +140,45 @@ hdrSkyboxMaterial.disableLighting = true;
 hdrSkybox.material = hdrSkyboxMaterial;
 hdrSkybox.infiniteDistance = true;
 */
+
+
+//THINGS TESTED FOR SKY
+//sun with glow
+/*
+
+sun = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 30, segments: 32 }, scene);
+sun.position=new BABYLON.Vector3(100,0,300)
+var sunMaterial = new BABYLON.StandardMaterial("sunMat", scene);
+sunMaterial.emissiveColor = new BABYLON.Color3(1, 1, 1);
+sun.material=sunMaterial
+
+
+glowLayer.customEmissiveColorSelector = function(mesh, subMesh, material, result) {
+    if (mesh.name === "sun") {
+        result.set(1, 0.8, 0, 1);
+    } else {
+        result.set(0, 0, 0, 0);
+    }
+}
+*/
+//gl.addIncludedOnlyMesh(sun);
+/*
+var highlightLayer = new BABYLON.HighlightLayer("hl1", scene);
+highlightLayer.addMesh(sun,new BABYLON.Color3(1,0.5,0));
+*/
+
+
+//colored skybox
+
+/*
+var colors = [];
+var numVertices = skybox.getTotalVertices();
+
+for (let i = 0; i < numVertices/3; ++i) {
+    colors.push(0.3, 0.2, 0.6, 1);
+    colors.push(0.6, 0.1, 0.6, 1);
+    colors.push(0.8, 0.6, 0.2, 1);
+}
+
+skybox.setVerticesData("color", colors);
+*/

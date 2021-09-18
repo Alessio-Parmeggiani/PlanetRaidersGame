@@ -216,7 +216,7 @@ function endLevel() {
 }   
 
 function increaseDifficulty(newEnemies) {
-    probFastEnemy +=  1/numNormalEnemies
+    probFastEnemy +=  0.1
     probTankEnemy = probFastEnemy/3
     //add 3 enemies
     for(var i=0;i<newEnemies;i++){
@@ -225,6 +225,8 @@ function increaseDifficulty(newEnemies) {
         else if(random<probFastEnemy) numFastEnemies+=1
         else numNormalEnemies+=1
     }
+    console.log(probFastEnemy)
+    console.log(numNormalEnemies,numFastEnemies,numTankEnemies)
 }
 
 function newLevel(){
