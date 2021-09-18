@@ -112,7 +112,7 @@ function bulletGen(mesh,bulletCount=1,shooter=null,ground,
     mode="parallel",bulletAngleOffset=bulletAngleOffset,bulletHorizOffset=0.5,
     range=bulletRange, speed=bulletSpeed,scene) {
 
-    bulletHorizOffset = mesh.getBoundingInfo().boundingBox.extendSize.x*1.1;
+    bulletHorizOffset =0.1 + mesh.getBoundingInfo().boundingBox.extendSize.x;
 
     var dir;
     var playerRot=getGlobalRotation(player).toEulerAngles()

@@ -47,7 +47,7 @@ var invincibleTime = 500;
 var bulletRange = 1;    // num of revolutions around the planet
 var bulletSpeed = Math.PI / 100;
 var bulletHeight = 1;
-var bulletParallelCount = 1;
+var bulletParallelCount = 2;
 var bulletArcCount = 1;
 var bulletAngleOffset = pi/12;
 var bulletHorizOffset = 0.5;
@@ -255,14 +255,16 @@ lights.push(spotLight)
 //creating the planet
 ground = BABYLON.MeshBuilder.CreateSphere("ground", { diameter: planetDiameter, segments: 32 }, scene);
 var planetMaterial = new BABYLON.StandardMaterial("planetMat", scene);
-var grassTexture = new BABYLON.Texture("texture/grass.jpg", scene);
-grassTexture.uScale = 20;
-grassTexture.vScale = 10;
+
+//var grassTexture = new BABYLON.Texture("texture/grass.jpg", scene);
+var grassTexture = new BABYLON.Texture("texture/planet.png", scene);
+grassTexture.uScale = 1; //20
+grassTexture.vScale = 1; //10
 planetMaterial.diffuseTexture = grassTexture;
 planetMaterial.bumpTexture = new BABYLON.Texture("texture/bump2.png", scene);
 planetMaterial.bumpTexture.uScale=10
 planetMaterial.bumpTexture.vScale=10
-planetMaterial.bumpTexture.level=0.4
+planetMaterial.bumpTexture.level=0.01
 ground.material = planetMaterial;
 
 
