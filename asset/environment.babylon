@@ -1,0 +1,3 @@
+{"producer":{"name":"Blender","version":"2.93.1","exporter_version":"2.93.2","file":"environment.babylon"},
+"autoClear":true,"clearColor":[0.0509,0.0509,0.0509],"gravity":[0,-9.81,0],"environmentTexture":"nebula.hdr","environmentTextureType":"BABYLON.HDRCubeTexture","environmentTextureSize":128,"isPBR":true,"environmentTextureRotationY":0,"createDefaultSkybox":true,"skyboxBlurLevel ":0
+}

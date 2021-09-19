@@ -182,3 +182,14 @@ for (let i = 0; i < numVertices/3; ++i) {
 
 skybox.setVerticesData("color", colors);
 */
+
+// Skybox
+/*
+var skybox = BABYLON.Mesh.CreateBox('SkyBox', 1000, scene, false, BABYLON.Mesh.BACKSIDE);
+skybox.material = new BABYLON.SkyMaterial('sky', scene);
+skybox.material.inclination =-0.2;
+skybox.material.useSunPosition=true
+skybox.material.sunPosition=new BABYLON.Vector3(100,300,300)
+skybox.material.turbidity=50
+*/
+

@@ -1,0 +1,43 @@
+Exporter version: 2.93.2, Blender version: 2.93.1
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used :
+		Inline textures     :  false
+		Material Type       :  PBR
+		Positions Precision :  4
+		Normals Precision   :  3
+		UVs Precision       :  3
+		Vert Color Precision:  3
+		Mat Weight Precision:  2
+		Keep Z-up r-handed  :  no
+		Texture directory   :  C:\Users\alessio\Desktop\planetGame2\asset\
+			WARNING: unsupported node type(ShaderNodeMath) will trigger baking
+			WARNING: unsupported node type(ShaderNodeMath) will trigger baking
+			WARNING: unsupported node type(ShaderNodeCombineRGB) will trigger baking
+			processing texture nebula
+	Python World class constructor completed
+	WARNING: No active camera has been assigned, or is not in a currently enabled collection
+	processing begun of mesh:  Plant.001
+		processing begun of material:  Material
+			WARNING: unsupported node type(ShaderNodeTexGradient) will trigger baking
+			WARNING: unsupported node type(ShaderNodeTexGradient) will trigger baking
+			WARNING: unsupported node type(ShaderNodeTexMusgrave) will trigger baking
+			WARNING: unsupported node type(ShaderNodeValToRGB) will trigger baking
+			WARNING: unsupported node type(ShaderNodeMixRGB) will trigger baking
+			WARNING: unsupported node type(ShaderNodeValToRGB) will trigger baking
+			Baking texture, type: DIFFUSE, mapped using: UVMap
+			processing texture Plant_001_baked_DIFFUSE
+				texture type:  diffuseTexture, mapped using: "UVMap"
+			Diffuse / albeto channel baked
+			bake time:  0 min, 8.2136 secs
+		num positions      :  1037
+		num normals        :  1037
+		num tangents       :  0
+		num uvs            :  2074
+		num uvs2           :  0
+		num colors         :  0
+		num triangles      :  2112
+========= Writing of JSON file started =========
+	writing mesh:  Plant.001
+========= Writing of JSON file completed =========
+========= end of processing =========
+elapsed time:  0 min, 8.4908 secs

@@ -47,7 +47,7 @@ var invincibleTime = 500;
 var bulletRange = 1;    // num of revolutions around the planet
 var bulletSpeed = Math.PI / 100;
 var bulletHeight = 1;
-var bulletParallelCount = 2;
+var bulletParallelCount = 1;
 var bulletArcCount = 1;
 var bulletAngleOffset = pi/12;
 var bulletHorizOffset = 0.5;
@@ -96,7 +96,8 @@ const assetsPath = [
     "enemy.babylon",
     "enemyFast.babylon",
     "grass.babylon",
-    "enemyTank.babylon"
+    "enemyTank.babylon",
+    "cloud.babylon"
 ]
 
 const playerPath = [
@@ -197,6 +198,7 @@ function main(){
     
 var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI/2, 1.2, 10, new BABYLON.Vector3(0, 0, -3), scene);
 
+
 //mainly for debug, control rotation of camera with mouse
 //if(DEBUG) 
     camera.attachControl();
@@ -205,10 +207,24 @@ camera.wheelPrecision = 45;
 glowLayer = new BABYLON.GlowLayer("glow", scene);
 glowLayer.intensity = 0.7;
 
-//var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-1, -1, 1), scene);
-light.intensity = 0.8;
+
+var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-1, -1, 0.5), scene);
+light.intensity = 3;
 lights.push(light)
+
+var light2 = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(1, 1, 0), scene);
+light2.diffuse = new BABYLON.Color3(0, 0, 1);
+light2.intensity =2;
+lights.push(light2)
+
+var light3 = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 0, 0), scene);
+//light3.diffuse = new BABYLON.Color3(1, 1, 1);
+//light3.groundColor = new BABYLON.Color3(0, 0.5, 0);
+light3.intensity =1;
+lights.push(light3)
+
+
+var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
 
 // SOUNDS
 var rocketLaunch = new BABYLON.Sound("rocketLaunch", "sounds/Space-Cannon.mp3", scene);
@@ -230,6 +246,17 @@ if(DEBUG){
 }
 playerHitbox.parent=player
 
+/*
+var spotLight = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(0,0, -2), 
+    new BABYLON.Vector3(0,0.5,1), Math.PI/2 , 20, scene);
+    spotLight.diffuse = new BABYLON.Color3(1, 1, 0);
+    spotLight.intensity=20
+spotLight.parent=player
+lights.push(spotLight)
+*/
+
+shadowGenerator.addShadowCaster(player,true)
+
 var forward = new BABYLON.Vector3(1, 0, 0);		
 var dir = player.getDirection(forward);
 dir.normalize();
@@ -245,41 +272,52 @@ player.parent=playerPivot
 
 
 
-var spotLight = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(0,0, -planetRadius), 
-    new BABYLON.Vector3(0,0.5,1), Math.PI/4 , 20, scene);
-    spotLight.diffuse = new BABYLON.Color3(1, 1, 0);
-    spotLight.intensity=0.5
-spotLight.parent=player
-lights.push(spotLight)
+
+
 
 //creating the planet
 ground = BABYLON.MeshBuilder.CreateSphere("ground", { diameter: planetDiameter, segments: 32 }, scene);
-var planetMaterial = new BABYLON.StandardMaterial("planetMat", scene);
 
 //var grassTexture = new BABYLON.Texture("texture/grass.jpg", scene);
 var grassTexture = new BABYLON.Texture("texture/planet.png", scene);
-grassTexture.uScale = 1; //20
-grassTexture.vScale = 1; //10
+var bumpTexture=new BABYLON.Texture("texture/planet_bump.png", scene);
+var roughnessTexture=new BABYLON.Texture("texture/planet-roughness.png",scene);
+
+//SKYBOX
+
+var skybox = BABYLON.Mesh.CreateBox("BackgroundSkybox", 500, scene, undefined, BABYLON.Mesh.BACKSIDE);
+var backgroundMaterial = new BABYLON.BackgroundMaterial("backgroundMaterial", scene);
+backgroundMaterial.reflectionTexture = new BABYLON.CubeTexture("texture/environment.env", scene);
+backgroundMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+skybox.material = backgroundMaterial;
+
+//skybox.parent=ground
+
+/*
+var planetMaterial = new BABYLON.StandardMaterial("planetMat", scene);
 planetMaterial.diffuseTexture = grassTexture;
-planetMaterial.bumpTexture = new BABYLON.Texture("texture/bump2.png", scene);
-planetMaterial.bumpTexture.uScale=10
-planetMaterial.bumpTexture.vScale=10
-planetMaterial.bumpTexture.level=0.01
-ground.material = planetMaterial;
+planetMaterial.bumpTexture = bumpTexture
+//planetMaterial.bumpTexture.uScale=10
+//planetMaterial.bumpTexture.vScale=10
+planetMaterial.bumpTexture.level=0.4
 
 
-// Skybox
-var skybox = BABYLON.Mesh.CreateBox('SkyBox', 1000, scene, false, BABYLON.Mesh.BACKSIDE);
-skybox.material = new BABYLON.SkyMaterial('sky', scene);
-skybox.material.inclination =-0.2;
-skybox.material.useSunPosition=true
-skybox.material.sunPosition=new BABYLON.Vector3(100,300,300)
-skybox.material.turbidity=50
+*/
+
+var pbr = new BABYLON.PBRMaterial("pbr", scene);
+
+ground.material = pbr;
 
 
+pbr.albedoTexture = grassTexture;
+pbr.bumpTexture = bumpTexture;
+pbr.microSurface=1.0
+pbr.reflectionTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("texture/environment.env", scene);
+pbr.reflectivityTexture=roughnessTexture
 
-
-
+pbr.bumpTexture.level=2
+ground.material.maxSimultaneousLights=8
+ground.receiveShadows = true;
 //some debug utilities
 if (DEBUG) {
     //ground.showBoundingBox = true
@@ -290,8 +328,13 @@ if (DEBUG) {
 
 //---------POPULATE PLANET---------------
 
+//var mesh=assets.assetMeshes.get("grass.babylon")
+var mesh=assets.assetMeshes.get("cloud.babylon")
+clouds=uniformlyDistribute(mesh,ground,density=0.2,collisions=false,height=20,randomScale=0.03,scene);
+for(c_idx=0;c_idx<clouds.length;c_idx++) shadowGenerator.getShadowMap().renderList.push(clouds[c_idx]);
+
 var mesh=assets.assetMeshes.get("grass.babylon")
-uniformlyDistribute(mesh,ground,density=0.5,collisions=true,scene);
+uniformlyDistribute(mesh,ground,density=0.5,collisions=false,height=0,randomScale=0,scene);
 //createEnemies(light);
 
 
