@@ -261,7 +261,7 @@ button:hover img.icon{
 }
 
 #back {
-    background-image: url("texture/gradient.jpg");
+    background-image: url("texture/render-background.png");
     z-index: 4;
     height: 100%;
     width: 100%;
@@ -276,7 +276,10 @@ button:hover img.icon{
 
 #splash_planet {
     align-self: center;
-    height: 52vh;
+    /*height: 52vh;*/
+    /* the new ones are for the rendered planet */
+    height: 80vh;
+    margin-bottom: -30vh;
 }
 
 .title {
@@ -297,6 +300,7 @@ h1#title {
     margin-top: 1.5vh;
     /*margin-bottom: 10px;*/
     margin-bottom: 1vh;
+    z-index: 1;
 }
 
 #button {
