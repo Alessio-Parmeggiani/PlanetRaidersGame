@@ -27,7 +27,7 @@ body {
 }
 
 div {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Josefin Sans', sans-serif;
     color: white;
     text-align: center;
     position: absolute;
@@ -90,7 +90,8 @@ div {
     top: 200%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 30%;
+    /*width: 30%;*/
+    width: 40vw;
     opacity: 0%;
 }
 
@@ -103,16 +104,20 @@ div {
 }
 
 button {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 800;
-    font-style: italic;
-    font-size: 18px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: 900;
+    /*font-style: italic;*/
+    font-size: 1em;
     color: white;
     text-transform: uppercase;
-    width: 150px;
-    height: 175px;
-    padding: 15px 25px;
-    margin: 20px 20px;
+    /*width: 150px;*/
+    width: 8vw;
+    /*height: 175px;*/
+    height: 18vh;
+    /*padding: 15px 25px;*/
+    padding: 1.5vh 1vw;
+    /*margin: 20px 20px;*/
+    margin: 2vh 1.5vw;
     border: 4px solid white;
     background-color: transparent;
     transition: 0.2s ease;
@@ -133,33 +138,21 @@ button:active {
 }
 
 img.icon {
-    height: 60px;
+    /*height: 60px;
     width: 60px;
-    margin-bottom: 10px;
+    margin-bottom: 10px;*/
     transition: 0.3s ease;
     filter: brightness(0%) invert(100%);
-    margin-left: 5px;
-    margin-right: 5px;
+    margin-left: 0.2vw;
+    margin-right: 0.2vw;
+    height: 7vh;
+    margin-bottom: 1vh;
 }
 
 button:hover img.icon{
     filter: brightness(0%);
 }
 
-/*
-button:focus::after {
-    position: absolute;
-    font-family: arial;
-    content: "L";
-    text-align: center;
-    color:rgb(19, 90, 221);
-    transform: scaleX(-1) rotate(-35deg);
-}
-
-span.success {
-    display: none;
-}
-*/
 #upgrade {
     font-style: italic;
     font-weight: 800;
@@ -283,6 +276,7 @@ span.success {
 
 #splash_planet {
     align-self: center;
+    height: 52vh;
 }
 
 .title {
@@ -296,16 +290,20 @@ span.success {
 
 h1#title {
     font-family: 'Josefin Sans', sans-serif;
-    font-size: 140px;
+    /*font-size: 140px;*/
+    font-size: 8.5em;
     font-weight: 300;
-    margin-top: 20px;
-    margin-bottom: 10px;
+    /*margin-top: 20px;*/
+    margin-top: 1.5vh;
+    /*margin-bottom: 10px;*/
+    margin-bottom: 1vh;
 }
 
 #button {
     font-family: 'Josefin Sans', sans-serif;
     font-weight: 400;
-    font-size: 40px;
+    /*font-size: 40px;*/
+    font-size: 2.5em;
     font-style: normal;
     height: auto;
     margin: 0px;
@@ -316,15 +314,17 @@ h1#title {
 #keys_container {
     display: flex;
     justify-content: center;
-    margin-top: 50px;
-    transform: scale(0.9);
+    /*margin-top: 50px;*/
+    margin-top: 5vh;
+    /*transform: scale(0.9);*/
 }
 
 .key {
     position: relative;
     display: flex;
     align-items: center;
-    padding: 0 140px 0 140px;
+    /*padding: 0 140px 0 140px;*/
+    padding: 0 8vw 0 8vw;
     width: 50%;
 }
 
@@ -338,20 +338,118 @@ h1#title {
 }
 
 .key_image {
-    margin: 0 30px 0 30px;
+    margin: 0 1.5vw 0 1.5vw;
+}
+
+.key_image#wasd {
+    height: 8vh;
 }
 
 .key_image#e {
     margin-left: 0px;
+    height: 3.9vh;
+}
+
+.key_image#spacebar {
+    height: 2vh;
 }
 
 .key_text {
     font-family: "Josefin Sans", sans-serif;
-    font-size: 40px;
+    /*font-size: 40px;*/
+    font-size: 2.2em;
     font-weight: 200;
 }
 
 .removed {
     transition: opacity 1s linear;
     opacity: 0;
+}
+
+#game_over_container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    top: 0;
+    z-index: 5;
+    /*display: flex;*/
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    display: none;
+    opacity: 0%;
+    transition: 2s ease;
+}
+
+.visible {
+    display: flex;
+}
+
+#game_over_title_container {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#sub_game_over {
+    position: relative;
+    font-size: 2.5vw;
+    font-weight: 200;
+}
+
+.game_over {
+    position: relative;
+    font-size: 5vw;
+    font-weight: 300;
+}
+
+#eclipse_container {
+    margin-right: -5.5vw;
+    /*margin-left: -35px;*/
+}
+
+#eclipse {
+    width: 17vw;
+}
+
+#game {
+    z-index: 1;
+    margin-right: -2.2vw;
+}
+
+#try_again {
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: 400;
+    font-size: 1.5em;
+    font-style: normal;
+    height: auto;
+    width: auto;
+    margin-top: 10vh;
+    border: 2px solid white;
+    text-transform: none;
+}
+
+.anim-game_over {
+    animation-name: fade-in;
+    animation-duration: 3s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0%;
+    }
+    100% {
+        opacity: 100%;
+    }
+}
+
+.anim-eclipse {
+    animation-name: fade-in;
+    animation-timing-function: ease-in;
+    animation-duration: 4s;
+    animation-fill-mode: forwards;
 }

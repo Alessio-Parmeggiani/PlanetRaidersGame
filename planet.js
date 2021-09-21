@@ -101,7 +101,7 @@ const assetsPath = [
 ]
 
 const playerPath = [
-    "playerTest2.babylon",
+    "player.babylon",
 ]
 
 //data
@@ -128,6 +128,8 @@ const upgradeList = document.getElementById("upgradeList");
 const bar = document.getElementById("bar");
 const playerHealth = document.getElementById("playerHealth");
 const splash = document.getElementById("back");
+const gameOver = document.getElementById("game_over_container");
+const eclipse = document.getElementById("eclipse_container");
 var chosen_upgrade;
 var newLevelSound;
 
@@ -176,6 +178,12 @@ buttons.forEach(button => {
                 })
                 splash.classList.add("removed");
                 return;
+            case "Try again":
+                // INSERIRE FUNZIONE CHE RESETTA IL LIVELLO
+                console.log("try again premuto");
+                gameOver.classList.remove("anim-game_over");
+                eclipse.classList.remove("anim-eclipse");
+                gameOver.style.display = "none";
         }
         congrats.classList.remove("anim-first");
         message.classList.remove("anim-first");
@@ -576,7 +584,12 @@ for(var idx = 0; idx < enemies.length; idx++) {
                 }
                 decreaseHealthBar();
                 newVulnerableTime = currentTime+invincibleTime;
-                //console.log("playerLife: "+playerLife)
+                if (playerLife == 0) {
+                    gameOver.classList.add("anim-game_over");
+                    eclipse.classList.add("anim-eclipse");
+                    gameOver.style.display = "flex";
+                }
+                console.log("playerLife: "+playerLife);
             }
         }
     }
