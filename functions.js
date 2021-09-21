@@ -151,6 +151,7 @@ function bulletGen(mesh,bulletCount=1,shooter=null,ground,
         if(mode=="parallel") {
             bullet.bullet.locallyTranslate(new BABYLON.Vector3(horizPosition, 0, 0));
             horizPosition += bulletHorizOffset;
+            projectiles.push(bullet);
         }
         if (mode=="arc") dir += bulletAngleOffset;
     
@@ -219,6 +220,54 @@ function createEnemies(){
     }
 }
 
+function clearGame() {
+    while(enemies.length>0){
+        enemies[0].enemy.dispose()
+        enemies.splice(0, 1);
+    }
+    while(bullets.length>0){
+        bullets[0].bullet.dispose();
+        bullets[0].pivot.dispose();
+        bullets.splice(0, 1);
+    }
+    
+    for(var k=0;k<scene.meshes.length;k++){
+        //console.log(scene.meshes[k])
+        name=scene.meshes[k].name
+        if(name.includes("bullet") ) {
+            scene.meshes[k].dispose()
+            console.log("found a bullet")
+        }
+    }
+}
+
+function newGame(){
+    console.log("new game")
+    actualLevel=0
+    //reset enemies
+    numNormalEnemies=0;
+    numFastEnemies=0;
+    numTankEnemies=0;
+
+    probTankEnemy=0;
+    probFastEnemy=0;
+
+    //reset playerStats
+    bulletArcCount=1
+    bulletParallelCount=1
+    bulletSpeed=Math.PI / 100
+    bulletRange=1
+
+    playerSpeed=200
+    //reset health
+    playerLife=maxPlayerLife
+
+    godMode=false
+
+    clearGame()
+} 
+
+
 function endLevel() {
     console.log("endLevel called");
     congrats.classList.add("anim-first");
@@ -228,9 +277,16 @@ function endLevel() {
     canvas.classList.add("anim-canvas");
 }   
 
+function newLevel(){
+    clearGame()
+    increaseDifficulty(3)
+    createEnemies()
+    numEnemies=numNormalEnemies+numFastEnemies+numTankEnemies
+    console.log("num of enemies in this level:",enemies.length,"---(normal,fast,tank)=",numNormalEnemies,numFastEnemies,numTankEnemies)
+}
+
 function increaseDifficulty(newEnemies) {
-    probFastEnemy +=  0.1
-    probTankEnemy = probFastEnemy/3
+    
     //add 3 enemies
     for(var i=0;i<newEnemies;i++){
         var random=Math.random()
@@ -238,17 +294,13 @@ function increaseDifficulty(newEnemies) {
         else if(random<probFastEnemy) numFastEnemies+=1
         else numNormalEnemies+=1
     }
-    console.log(probFastEnemy)
-    console.log(numNormalEnemies,numFastEnemies,numTankEnemies)
-}
-
-function newLevel(){
-    increaseDifficulty(3)
-    createEnemies()
-    numEnemies=numNormalEnemies+numFastEnemies+numTankEnemies
-
+    console.log("enemy probabilities: fast=",probFastEnemy,"tank=",probTankEnemy)
+    probFastEnemy +=  0.1
+    probTankEnemy = probFastEnemy/3
     
 }
+
+
 
 function decreaseHealthBar() {
     var newWidth;

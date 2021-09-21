@@ -26,7 +26,7 @@ var stepCounter = 0;
 var PLAYERMOVE = false;
 var DEBUG = false;
 
-
+var actualLevel=0
 //player stats
 var playerWidth = 0.75;
 var wheelWidth = 0.5;
@@ -34,6 +34,7 @@ var wheelWidth = 0.5;
 var attackSpeed = 300;
 var rotationSpeed = Math.PI / 100;
 
+var godMode=false
 var maxPlayerLife = 100;
 var playerLife = maxPlayerLife;
 var bonusLife = 0;
@@ -142,11 +143,12 @@ buttons.forEach(button => {
         switch (chosen_upgrade) {
             case "Player speed up":
                 playerSpeed /= 2;
-                icon.src = "icons/Speed up.png";
+                icon.src = "icons/Speed up.png";    
                 break;
             case "Bullets +1":
                 bulletParallelCount += 1;
                 icon.src = "icons/Bullets +1.png";
+
                 break;
             case "Arc bullets":
                 bulletArcCount+=2;
@@ -173,6 +175,7 @@ buttons.forEach(button => {
                     // condition needed to ignore the play button transition
                     if (event.target.id == "back") {
                         splash.remove();
+                        newGame()
                         newLevel()
                     }
                 })
@@ -180,10 +183,12 @@ buttons.forEach(button => {
                 return;
             case "Try again":
                 // INSERIRE FUNZIONE CHE RESETTA IL LIVELLO
+                newGame()
                 console.log("try again premuto");
                 gameOver.classList.remove("anim-game_over");
                 eclipse.classList.remove("anim-eclipse");
                 gameOver.style.display = "none";
+                
         }
         congrats.classList.remove("anim-first");
         message.classList.remove("anim-first");
@@ -191,10 +196,14 @@ buttons.forEach(button => {
         upgrade.classList.remove("anim-upgrade");
         canvas.classList.remove("anim-canvas");
         upgradeList.appendChild(icon);
+        //game just started
+        console.log("START LEVEL: ",actualLevel)
 
-        //numEnemies += 3;
+        newLevel()
         newLevelSound.play();
-        newLevel();
+        
+        
+        
         //createEnemies(light); I can't because the light still isn't defined
     }
 })
@@ -515,8 +524,8 @@ fps.innerHTML = engine.getFps().toFixed() + "fps";
 
 var currentTime=new Date().getTime()
 //console.log(bullets)
-for (var idx = 0; idx < bullets.length; idx++) {
-
+for (var idx = 0; idx < bullets.length && bullets[idx]; idx++) {
+    
     var bullet = bullets[idx];
     var pivot=bullet.pivot
     var bulletMesh=bullet.bullet
@@ -533,30 +542,22 @@ for (var idx = 0; idx < bullets.length; idx++) {
         bulletMesh.dispose();    // delete from scene
         pivot.dispose();
         bullets.splice(idx,1);   // delete from array 
+        idx--
     }
+    else {
+        //collision bullet-enemies 
+        for (let j=0; j<enemies.length; j++) {
+            if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
+                //enemy hit
+                enemyHit.play();
+                enemies[j].whenHit(bullet.damage);
 
-    //collision bullet-objects
-    collidingObjects.forEach(objects => {
-        for( var i=0; i<objects.length;i++){
-            if (bulletMesh.intersectsMesh(objects[i], false)){
-                bulletMesh.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
-                objects[i].dispose();
-                objects.splice(i,1);  
+                //delete bullet
+                bulletMesh.dispose();
+                pivot.dispose();
+                bullets.splice(idx, 1);
+                idx--
             }
-        }
-    })
-    //collision bullet-enemies 
-    for (let j=0; j<enemies.length; j++) {
-        if (bulletMesh.intersectsMesh(enemies[j].enemy, false)) {
-
-            //enemy hit
-            enemyHit.play();
-            enemies[j].whenHit(bullet.damage);
-
-            //delete bullet
-            bulletMesh.dispose();
-            pivot.dispose();
-            bullets.splice(idx, 1);
         }
     }
     
@@ -573,9 +574,9 @@ for(var idx = 0; idx < enemies.length; idx++) {
         }
 
         //collision enemy-player
-        if(currentTime>newVulnerableTime){
+        if(!godMode && currentTime>newVulnerableTime){
             if (playerHitbox.intersectsMesh(enemies[idx].enemy, false)){
-                playerHit.play();
+                if (playerLife>0) playerHit.play();
                 if (bonusLife > 0) {
                     bonusLife -= contactDamage;
                 }
@@ -584,12 +585,15 @@ for(var idx = 0; idx < enemies.length; idx++) {
                 }
                 decreaseHealthBar();
                 newVulnerableTime = currentTime+invincibleTime;
+                //player is dead
                 if (playerLife == 0) {
+                    godMode=true
                     gameOver.classList.add("anim-game_over");
                     eclipse.classList.add("anim-eclipse");
                     gameOver.style.display = "flex";
+                    //or enemies still hit player
+
                 }
-                console.log("playerLife: "+playerLife);
             }
         }
     }
@@ -597,13 +601,14 @@ for(var idx = 0; idx < enemies.length; idx++) {
     //enemy is performing death animation
     else {
         //fall
-        enemies[idx].enemy.locallyTranslate(new BABYLON.Vector3(0, -0.008, 0))
+        enemies[idx].enemy.locallyTranslate(new BABYLON.Vector3(0, -0.004, 0))
         enemies[idx].enemy.rotation.y+=0.01
 
         enemyHeight=BABYLON.Vector3.Distance(enemies[idx].enemy.getAbsolutePosition(),ground.position)
         if(enemyHeight<=planetRadius+(mesh.getBoundingInfo().boundingBox.extendSize.x)/2) {
-            enemies[idx].enemy.dispose()
+            enemies[idx].clean()
             enemies.splice(idx, 1);
+            idx--
             enemyDead.play();
             console.log("enemy dead")
             remainingEnemies=enemies.length

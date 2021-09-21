@@ -46,11 +46,10 @@ class Enemy{
     }
 
     spawn(position=new BABYLON.Vector3(0,0,0)){
-        console.log("creating enemy at: "+position)
         //time used for naming
         const currentTime = new Date().getTime();
 
-        this.enemy=this.mesh.createInstance()
+        this.enemy=this.mesh.createInstance("enemy")
         this.enemy.position=position;
         if(DEBUG) this.enemyPivot = BABYLON.Mesh.CreateCapsule(`enemyPivot`, { radiusTop: 0.05 }, scene);
         else this.enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
@@ -166,7 +165,12 @@ class Enemy{
         if (this.life <= 0) this.dying=true
         else  this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
     }
-  
+    
+    clean() {
+        
+        this.enemy.dispose()
+        this.enemyPivot.dispose()
+    }
 }
 
 //serve la classe proiettile?
@@ -266,7 +270,7 @@ class Bullet{
         else this.pivot = new BABYLON.TransformNode(`${currentTime}pivot$`); // transformNode is invisible
         //get instance from pre-loaded model
     
-        this.bullet = mesh.createInstance();
+        this.bullet = mesh.createInstance("bullet ");
         //this.bullet.scaling = new BABYLON.Vector3(0.15,0.15,0.15);
         var shooterPos = this.shooter.getAbsolutePosition();
         this.bullet.position = shooterPos;
