@@ -48,6 +48,8 @@ class Enemy{
     spawn(position=new BABYLON.Vector3(0,0,0)){
         //time used for naming
         const currentTime = new Date().getTime();
+        
+        spawningAnimation(position)
 
         this.enemy=this.mesh.createInstance("enemy")
         this.enemy.position=position;

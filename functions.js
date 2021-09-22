@@ -179,7 +179,6 @@ function createEnemies(){
     var enemyType=enemyNormalType
     for(var i=0;i<numNormalEnemies;i++) {
         var position=randomPos(planetRadius)
-        spawningAnimation(position)
         //taret is player with some randomness
         var target=player
         var enemy=new Enemy(mesh,ground,target,enemyType,DEBUG,scene)
@@ -195,7 +194,6 @@ function createEnemies(){
     enemyType=enemyFastType
     for(var i=0;i<numFastEnemies;i++) {
         var position=randomPos(planetRadius)
-        spawningAnimation(position)
         //taret is player with some randomness
         var target=player
         var enemy=new Enemy(mesh,ground,target,enemyType,DEBUG,scene)
@@ -211,7 +209,6 @@ function createEnemies(){
     enemyType=enemyTankType
     for(var i=0;i<numTankEnemies;i++) {
         var position=randomPos(planetRadius)
-        spawningAnimation(position)
         //taret is player with some randomness
         var target=player
         var enemy=new Enemy(mesh,ground,target,enemyType,DEBUG,scene)
