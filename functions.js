@@ -82,12 +82,13 @@ function getGlobalRotation(obj){
 
 }
 //uniformly distribute something on planet
-function uniformlyDistribute(mesh,ground,number=1,collisions=false,height=0,randomScale=0,scene){
+function uniformlyDistribute(mesh,ground,number=1,collisions=false,height=0,randomScale=0,shadows=false){
     
     objects = [];
     for (var i = 0; i < number; i++) {
         
-        obj = mesh.createInstance();        
+        obj = mesh.createInstance(); 
+        if(shadows) shadowGenerator.addShadowCaster(obj);       
         
         //random scale between -randomScale and +randomScale
         if (randomScale) {
@@ -104,8 +105,6 @@ function uniformlyDistribute(mesh,ground,number=1,collisions=false,height=0,rand
             new_height=height+((Math.random()*2)-1)*height/2
             obj.locallyTranslate(new BABYLON.Vector3(0,new_height,0))
         }
-
-        
 
         obj.parent = ground;
         objects.push(obj);
@@ -186,6 +185,7 @@ function createEnemies(){
         var enemy=new Enemy(mesh,ground,target,enemyType,DEBUG,scene)
         enemy.spawn(position);
         enemy.enemy.locallyTranslate(new BABYLON.Vector3(0, 0.5, 0))
+        shadowGenerator.addShadowCaster(enemy.enemy,false);  
         enemies.push(enemy)
     }
 
@@ -201,6 +201,7 @@ function createEnemies(){
         var enemy=new Enemy(mesh,ground,target,enemyType,DEBUG,scene)
         enemy.spawn(position);
         enemy.enemy.locallyTranslate(new BABYLON.Vector3(0, 0.5, 0))
+        shadowGenerator.addShadowCaster(enemy.enemy); 
         enemies.push(enemy)
     }
 
@@ -216,6 +217,7 @@ function createEnemies(){
         var enemy=new Enemy(mesh,ground,target,enemyType,DEBUG,scene)
         enemy.spawn(position);
         enemy.enemy.locallyTranslate(new BABYLON.Vector3(0, 0.5, 0))
+        shadowGenerator.addShadowCaster(enemy.enemy); 
         enemies.push(enemy)
     }
 }

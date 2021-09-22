@@ -8,6 +8,7 @@ var engine = null;
 var scene = null;
 var ground = null;
 var player = null;
+var shadowGenerator=null;
 
 var glowLayer=null
 
@@ -28,8 +29,6 @@ var DEBUG = false;
 
 var actualLevel=0
 //player stats
-var playerWidth = 0.75;
-var wheelWidth = 0.5;
 
 var attackSpeed = 300;
 var rotationSpeed = Math.PI / 100;
@@ -227,7 +226,7 @@ glowLayer.intensity = 0.7;
 
 var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-1, -1, 0.5), scene);
 light.intensity = 3;
-light.position = new BABYLON.Vector3(0, 10, -10);
+light.position = new BABYLON.Vector3(20, 20, -10);
 lights.push(light)
 
 
@@ -243,7 +242,7 @@ light3.intensity =0;
 lights.push(light3)
 
 
-var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
+shadowGenerator = new BABYLON.ShadowGenerator(2048, light);
 
 // SOUNDS
 var rocketLaunch = new BABYLON.Sound("rocketLaunch", "sounds/Space-Cannon.mp3", scene);
@@ -310,18 +309,7 @@ backgroundMaterial.reflectionTexture = new BABYLON.CubeTexture("texture/environm
 backgroundMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
 skybox.material = backgroundMaterial;
 
-//skybox.parent=ground
 
-/*
-var planetMaterial = new BABYLON.StandardMaterial("planetMat", scene);
-planetMaterial.diffuseTexture = grassTexture;
-planetMaterial.bumpTexture = bumpTexture
-//planetMaterial.bumpTexture.uScale=10
-//planetMaterial.bumpTexture.vScale=10
-planetMaterial.bumpTexture.level=0.4
-
-
-*/
 
 var pbr = new BABYLON.PBRMaterial("pbr", scene);
 
@@ -348,20 +336,11 @@ light.parent=ground
 light2.parent=ground
 
 //---------POPULATE PLANET---------------
-
-//var mesh=assets.assetMeshes.get("grass.babylon")
 var mesh=assets.assetMeshes.get("cloud.babylon")
-clouds=uniformlyDistribute(mesh,ground,number=20,collisions=false,height=20,randomScale=0.03,scene);
-for(c_idx=0;c_idx<clouds.length;c_idx++) shadowGenerator.getShadowMap().renderList.push(clouds[c_idx]);
+clouds=uniformlyDistribute(mesh,ground,number=20,collisions=false,height=20,randomScale=0.03,false);
 
 var mesh=assets.assetMeshes.get("grass.babylon")
-uniformlyDistribute(mesh,ground,number=100,collisions=false,height=0,randomScale=0,scene);
-//createEnemies(light);
-
-
-// ------------ SHOW UI -----------------
-
-//var playerHealth = new HealthBar(player, light, scene, false);
+uniformlyDistribute(mesh,ground,number=100,collisions=false,height=0,randomScale=0,true);
 
 //------------INPUT READING--------------
 
@@ -385,8 +364,6 @@ var rotatingLeft=false
 scene.onBeforeRenderObservable.add(() => {
 
 if (inputMap["w"] || inputMap["ArrowUp"]) {
-    //wheelR.rotation.x += 0.05;
-    //wheelL.rotation.x += 0.05;
     var forward = new BABYLON.Vector3(1, 0, 0);		
     var dir = player.getDirection(forward);
     dir.normalize();
@@ -396,8 +373,7 @@ if (inputMap["w"] || inputMap["ArrowUp"]) {
     
     if (PLAYERMOVE) playerPivot.rotate(dir, Math.PI / playerSpeed, BABYLON.Space.WORLD);  // the player moves, the planet stays still
     else {
-        ground.rotate(dir, -Math.PI / playerSpeed, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates
-        //skybox.rotate(dir, -Math.PI / playerSpeed, BABYLON.Space.WORLD);   
+        ground.rotate(dir, -Math.PI / playerSpeed, BABYLON.Space.WORLD);   // the player doesn't move, the planet rotates   
 
     }
     positionUpdated=true
@@ -434,8 +410,6 @@ if (inputMap["a"] || inputMap["ArrowLeft"]) {
     if (startAnimation(animating, forward)) animating = true;
 }
 if (inputMap["s"] || inputMap["ArrowDown"]) {
-    //wheelR.rotation.x -= 0.05;
-    //wheelL.rotation.x -= 0.05;
 
     var forward = new BABYLON.Vector3(1, 0, 0);		
     var dir = player.getDirection(forward);
@@ -462,8 +436,6 @@ if (inputMap["s"] || inputMap["ArrowDown"]) {
     previous_forward = false;
 }
 if (inputMap["d"] || inputMap["ArrowRight"]) {
-    //wheelR.rotation.x -= 0.05;
-    //wheelL.rotation.x += 0.05;
     player.rotation.z -= rotationSpeed;
 
     if (!inputMap["w"] && !inputMap["ArrowUp"] &&
