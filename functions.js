@@ -82,38 +82,38 @@ function getGlobalRotation(obj){
 
 }
 //uniformly distribute something on planet
-function uniformlyDistribute(mesh,ground,density=0.5,collisions=false,height=0,randomScale=0,scene){
+function uniformlyDistribute(mesh,ground,number=1,collisions=false,height=0,randomScale=0,scene){
     
     objects = [];
-    for (var i = 0; i < 100; i++) {
-        if (Math.random()<density) {
-            obj = mesh.createInstance();        
-            
-            //random scale between -randomScale and +randomScale
-            if (randomScale) {
-                var scale = 0.1+((Math.random()*2)-1)*randomScale;
-                obj.scaling=new BABYLON.Vector3(scale,scale,scale)
-            }
-
-            //point on surface of sphere
-            var position = randomPos(planetDiameter/2);
-            obj.position = position;
-            orientSurface(obj,position,ground);
-
-            if (height) {
-                new_height=height+((Math.random()*2)-1)*height/2
-                obj.locallyTranslate(new BABYLON.Vector3(0,new_height,0))
-            }
-
-            
-
-            obj.parent = ground;
-            objects.push(obj);
-   
-            if(collisions) {
-                obj.checkCollisions = true;
-            }
+    for (var i = 0; i < number; i++) {
+        
+        obj = mesh.createInstance();        
+        
+        //random scale between -randomScale and +randomScale
+        if (randomScale) {
+            var scale = 0.1+((Math.random()*2)-1)*randomScale;
+            obj.scaling=new BABYLON.Vector3(scale,scale,scale)
         }
+
+        //point on surface of sphere
+        var position = randomPos(planetDiameter/2);
+        obj.position = position;
+        orientSurface(obj,position,ground);
+
+        if (height) {
+            new_height=height+((Math.random()*2)-1)*height/2
+            obj.locallyTranslate(new BABYLON.Vector3(0,new_height,0))
+        }
+
+        
+
+        obj.parent = ground;
+        objects.push(obj);
+
+        if(collisions) {
+            obj.checkCollisions = true;
+        }
+        
         
     }
 

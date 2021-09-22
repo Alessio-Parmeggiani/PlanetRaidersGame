@@ -227,7 +227,9 @@ glowLayer.intensity = 0.7;
 
 var light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-1, -1, 0.5), scene);
 light.intensity = 3;
+light.position = new BABYLON.Vector3(0, 10, -10);
 lights.push(light)
+
 
 var light2 = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(1, 1, 0), scene);
 light2.diffuse = new BABYLON.Color3(0, 0, 1);
@@ -237,7 +239,7 @@ lights.push(light2)
 var light3 = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 0, 0), scene);
 //light3.diffuse = new BABYLON.Color3(1, 1, 1);
 //light3.groundColor = new BABYLON.Color3(0, 0.5, 0);
-light3.intensity =1;
+light3.intensity =0;
 lights.push(light3)
 
 
@@ -263,14 +265,14 @@ if(DEBUG){
 }
 playerHitbox.parent=player
 
-/*
-var spotLight = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(0,0, -2), 
+
+var spotLight = new BABYLON.SpotLight("spotLight", new BABYLON.Vector3(0,0, -3), 
     new BABYLON.Vector3(0,0.5,1), Math.PI/2 , 20, scene);
-    spotLight.diffuse = new BABYLON.Color3(1, 1, 0);
+    spotLight.diffuse = new BABYLON.Color3(1, 0.2, 0);
     spotLight.intensity=20
 spotLight.parent=player
 lights.push(spotLight)
-*/
+
 
 shadowGenerator.addShadowCaster(player,true)
 
@@ -342,16 +344,18 @@ if (DEBUG) {
     player.visibility = 0.8;
 }
 
+light.parent=ground
+light2.parent=ground
 
 //---------POPULATE PLANET---------------
 
 //var mesh=assets.assetMeshes.get("grass.babylon")
 var mesh=assets.assetMeshes.get("cloud.babylon")
-clouds=uniformlyDistribute(mesh,ground,density=0.2,collisions=false,height=20,randomScale=0.03,scene);
+clouds=uniformlyDistribute(mesh,ground,number=20,collisions=false,height=20,randomScale=0.03,scene);
 for(c_idx=0;c_idx<clouds.length;c_idx++) shadowGenerator.getShadowMap().renderList.push(clouds[c_idx]);
 
 var mesh=assets.assetMeshes.get("grass.babylon")
-uniformlyDistribute(mesh,ground,density=0.5,collisions=false,height=0,randomScale=0,scene);
+uniformlyDistribute(mesh,ground,number=100,collisions=false,height=0,randomScale=0,scene);
 //createEnemies(light);
 
 
