@@ -108,7 +108,9 @@ const playerPath = [
 var bullets = [];
 var collidingObjects = [];
 var enemies = [];
-var lights=[]
+var lights = [];
+var upgradeButtons = [];
+var displayedUpgrades = [];
 
 // ---- Animations ----
 var animating = false;
@@ -120,6 +122,7 @@ var fps = document.getElementById("fps");
 
 // ------- BUTTON MANAGER -------
 const buttons = Array.from(document.getElementsByTagName("button"));
+upgradeButtons = buttons.filter(button => {return button.className == "upgrade_button"});
 const congrats = document.getElementById("congrats");
 const message = document.getElementById("message");
 const container = document.getElementById("container");
@@ -182,27 +185,37 @@ buttons.forEach(button => {
                 return;
             case "Try again":
                 // INSERIRE FUNZIONE CHE RESETTA IL LIVELLO
-                newGame()
+                newGame();
+                updateHealthBar();
+                upgradeButtons = buttons.filter(button => {return button.className == "upgrade_button"});
+                displayedUpgrades = [];
+                upgradeList.innerHTML = "";
                 console.log("try again premuto");
                 gameOver.classList.remove("anim-game_over");
                 eclipse.classList.remove("anim-eclipse");
                 gameOver.style.display = "none";
-                
+                newLevel();
+                newLevelSound.play();
+                return;                
         }
+        // Managing upgrade buttons
+        displayedUpgrades = displayedUpgrades.filter(element => {return element.innerText != button.innerText});
+        button.setAttribute("style", "display: none");
+        displayedUpgrades.forEach(element => {upgradeButtons.push(element);});
+        displayedUpgrades = [];
+        // Upgrade animations
         congrats.classList.remove("anim-first");
         message.classList.remove("anim-first");
         container.classList.remove("anim-container");
         upgrade.classList.remove("anim-upgrade");
         canvas.classList.remove("anim-canvas");
         upgradeList.appendChild(icon);
+
         //game just started
         console.log("START LEVEL: ",actualLevel)
 
         newLevel()
         newLevelSound.play();
-        
-        
-        
         //createEnemies(light); I can't because the light still isn't defined
     }
 })
@@ -559,7 +572,7 @@ for(var idx = 0; idx < enemies.length; idx++) {
                 else {
                     playerLife -= contactDamage;
                 }
-                decreaseHealthBar();
+                updateHealthBar();
                 newVulnerableTime = currentTime+invincibleTime;
                 //player is dead
                 if (playerLife == 0) {

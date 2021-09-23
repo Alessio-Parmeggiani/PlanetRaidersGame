@@ -269,6 +269,16 @@ function newGame(){
 
 function endLevel() {
     console.log("endLevel called");
+    upgradeButtons.forEach(button => {
+        button.setAttribute("style", "display: none");
+    });
+    var randomIndex;
+    displayedUpgrades = [];
+    for (var i=0; i<3 && upgradeButtons.length != 0; i++) {
+        randomIndex = Math.floor(Math.random()*upgradeButtons.length);
+        upgradeButtons[randomIndex].setAttribute("style", "display: flex");
+        displayedUpgrades.push(upgradeButtons.splice(randomIndex, 1)[0]);
+    }
     congrats.classList.add("anim-first");
     message.classList.add("anim-first");
     container.classList.add("anim-container");
@@ -300,8 +310,7 @@ function increaseDifficulty(newEnemies) {
 }
 
 
-
-function decreaseHealthBar() {
+function updateHealthBar() {
     var newWidth;
     if (document.getElementById("moreHealth") != null) {
         if (bonusLife == 0) {
@@ -316,6 +325,10 @@ function decreaseHealthBar() {
         newWidth = playerLife/100*150;
         playerHealth.style.width = `${newWidth}px`;
 
+        if (newWidth == 150) {
+            playerHealth.style.background = "#40ff20";
+            playerHealth.style.boxShadow = "0px 0px 3px 2px #40ff22"
+        }
         if (newWidth < 150*(0.75) && newWidth > 150*(0.5)) {
             playerHealth.style.background = "#ffcc00";
             playerHealth.style.boxShadow = "0px 0px 3px 2px #ffcc00";
