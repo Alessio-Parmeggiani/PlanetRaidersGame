@@ -133,6 +133,7 @@ const playerHealth = document.getElementById("playerHealth");
 const splash = document.getElementById("back");
 const gameOver = document.getElementById("game_over_container");
 const eclipse = document.getElementById("eclipse_container");
+const endGame = document.getElementById("victory_container");
 var chosen_upgrade;
 var newLevelSound;
 
@@ -183,17 +184,27 @@ buttons.forEach(button => {
                 })
                 splash.classList.add("removed");
                 return;
+            case "Play again":
             case "Try again":
                 // INSERIRE FUNZIONE CHE RESETTA IL LIVELLO
-                newGame();
-                updateHealthBar();
                 upgradeButtons = buttons.filter(button => {return button.className == "upgrade_button"});
                 displayedUpgrades = [];
                 upgradeList.innerHTML = "";
                 console.log("try again premuto");
-                gameOver.classList.remove("anim-game_over");
-                eclipse.classList.remove("anim-eclipse");
-                gameOver.style.display = "none";
+                console.log(actualLevel);
+                if (actualLevel < 5) {
+                    console.log("oh");
+                    gameOver.classList.remove("anim-game_over");
+                    eclipse.classList.remove("anim-eclipse");
+                    gameOver.style.display = "none";
+                }
+                else {
+                    console.log("ciao");
+                    endGame.classList.remove("anim-game_over");
+                    endGame.style.display = "none";
+                }
+                newGame();
+                updateHealthBar();
                 newLevel();
                 newLevelSound.play();
                 return;                
@@ -604,7 +615,14 @@ for(var idx = 0; idx < enemies.length; idx++) {
             if (enemies.length == 0) {
                 console.log("all enemies dead");
                 endLevelSound.play();
-                endLevel();
+                actualLevel++;
+                if (actualLevel == 5) {
+                    endGame.classList.add("anim-game_over");
+                    endGame.style.display = "block";
+                }
+                else {
+                    endLevel();
+                }
             }
         }
     }
