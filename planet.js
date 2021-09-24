@@ -134,6 +134,7 @@ const splash = document.getElementById("back");
 const gameOver = document.getElementById("game_over_container");
 const eclipse = document.getElementById("eclipse_container");
 const endGame = document.getElementById("victory_container");
+var moreHealth;
 var chosen_upgrade;
 var newLevelSound;
 
@@ -151,14 +152,14 @@ buttons.forEach(button => {
             case "Bullets +1":
                 bulletParallelCount += 1;
                 icon.src = "icons/Bullets +1.png";
-
                 break;
             case "Arc bullets":
                 bulletArcCount+=2;
                 icon.src = "icons/Arc bullets.png";
                 break;
             case "Bullets speed up":
-                bulletSpeed = Math.PI / 50;
+                bulletSpeed*=2;
+                attackSpeed-=50;
                 icon.src = "icons/Bullets speed up.png";
                 break;
             case "Bullets range up":
@@ -166,12 +167,17 @@ buttons.forEach(button => {
                 icon.src = "icons/Range up.png";
                 break;
             case "Health up":
-                bonusLife = 30;
+                bonusLife += 30;
                 icon.src = "icons/Health up.png";
-                const moreHealth = document.createElement("div");
-                moreHealth.id = "moreHealth";
-                moreHealth.style.left = 30 + playerHealth.offsetWidth + "px";
-                bar.appendChild(moreHealth);
+                if (moreHealth) {
+                    moreHealth.style.width = 50 + moreHealth.offsetWidth + "px";
+                }
+                else {
+                    moreHealth = document.createElement("div");
+                    moreHealth.id = "moreHealth";
+                    moreHealth.style.left = 30 + playerHealth.offsetWidth + "px";
+                    bar.appendChild(moreHealth);
+                }
                 break;
             case "Play":
                 splash.addEventListener("transitionend", (event) => {
@@ -186,7 +192,6 @@ buttons.forEach(button => {
                 return;
             case "Play again":
             case "Try again":
-                // INSERIRE FUNZIONE CHE RESETTA IL LIVELLO
                 upgradeButtons = buttons.filter(button => {return button.className == "upgrade_button"});
                 displayedUpgrades = [];
                 upgradeList.innerHTML = "";
@@ -211,7 +216,8 @@ buttons.forEach(button => {
         }
         // Managing upgrade buttons
         displayedUpgrades = displayedUpgrades.filter(element => {return element.innerText != button.innerText});
-        button.setAttribute("style", "display: none");
+        // Health up button should not disappear if selected once, as the other buttons do
+        if (chosen_upgrade != "Health up") button.setAttribute("style", "display: none");
         displayedUpgrades.forEach(element => {upgradeButtons.push(element);});
         displayedUpgrades = [];
         // Upgrade animations
@@ -220,7 +226,10 @@ buttons.forEach(button => {
         container.classList.remove("anim-container");
         upgrade.classList.remove("anim-upgrade");
         canvas.classList.remove("anim-canvas");
-        upgradeList.appendChild(icon);
+        // Upgrade icon in the top-right corner
+        if (chosen_upgrade != "Health up") {
+            upgradeList.appendChild(icon);
+        }
 
         //game just started
         console.log("START LEVEL: ",actualLevel)
@@ -542,7 +551,7 @@ for (var idx = 0; idx < bullets.length && bullets[idx]; idx++) {
         bulletMesh.dispose();    // delete from scene
         pivot.dispose();
         bullets.splice(idx,1);   // delete from array 
-        idx--
+        idx--;
     }
     else {
         //collision bullet-enemies 
@@ -556,7 +565,7 @@ for (var idx = 0; idx < bullets.length && bullets[idx]; idx++) {
                 bulletMesh.dispose();
                 pivot.dispose();
                 bullets.splice(idx, 1);
-                idx--
+                idx--;
             }
         }
     }

@@ -274,7 +274,7 @@ function endLevel() {
     });
     var randomIndex;
     displayedUpgrades = [];
-    for (var i=0; i<3 && upgradeButtons.length != 0; i++) {
+    for (var i=0; i<2 && upgradeButtons.length != 0; i++) {
         randomIndex = Math.floor(Math.random()*upgradeButtons.length);
         upgradeButtons[randomIndex].setAttribute("style", "display: flex");
         displayedUpgrades.push(upgradeButtons.splice(randomIndex, 1)[0]);
@@ -315,6 +315,7 @@ function updateHealthBar() {
     if (document.getElementById("moreHealth") != null) {
         if (bonusLife == 0) {
             moreHealth.remove();
+            moreHealth = null;
         }
         else {
             newWidth = bonusLife/100*150;

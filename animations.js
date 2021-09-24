@@ -294,11 +294,6 @@ function cannonShoot() {
     cannonAnim2.setKeys(keyFrames);
 
     scene.beginDirectAnimation(cannon, [cannonAnim,cannonAnim2], 0,  0.8*totalDuration, true);
-
-    
-
-    
-
 }
 
 

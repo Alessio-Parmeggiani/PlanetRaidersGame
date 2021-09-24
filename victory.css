@@ -49,7 +49,7 @@ div {
 #congrats {
     font-style: italic;
     font-weight: 800;
-    font-size: 40px;
+    font-size: 3.5em;
     text-transform: uppercase;
     animation-delay: 1s;
 }
@@ -154,9 +154,8 @@ button:hover img.icon{
 }
 
 #upgrade {
-    font-style: italic;
     font-weight: 800;
-    font-size: 35px;
+    font-size: 3.5em;
     text-transform: uppercase;
 }
 
@@ -174,7 +173,7 @@ button:hover img.icon{
         opacity: 0%;
     }
     100% {
-        top: 17%;
+        top: 30%;
         opacity: 100%;
     }
 }
@@ -242,6 +241,7 @@ button:hover img.icon{
     top: 20px;
     left: 30px;
     z-index: 1;
+    transition: 0.3s;
 }
 
 #upgradeList {
