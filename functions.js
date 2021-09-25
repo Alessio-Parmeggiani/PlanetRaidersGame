@@ -38,7 +38,7 @@ function explode(emitter) {
         
 }
 
-//
+// get a point on a range near another point (used for the target of the enemies)
 function getPointNearPosition(p0,range){
     //random positive or negative
     var ranPos=Math.round(Math.random()) ? 1 : -1;
@@ -50,11 +50,10 @@ function getPointNearPosition(p0,range){
     var dir=pos
     dir.normalize()
     var ret=dir.scale(planetRadius)
-    //check if point is on surface
-    //console.log((ret.x*ret.x +ret.y*ret.y +ret.z*ret.z)==planetRadius*planetRadius)
     return ret
-
 }
+
+
 
 //orient object in right direction
 function orientSurface(object,position,ground) {
@@ -79,8 +78,9 @@ function getGlobalRotation(obj){
     var tempWorldMatrix = obj.getWorldMatrix();
     tempWorldMatrix.decompose(scale, rotation, translation);
     return rotation;
-
 }
+
+
 //uniformly distribute something on planet
 function uniformlyDistribute(mesh,ground,number=1,collisions=false,height=0,randomScale=0,shadows=false){
     
@@ -111,8 +111,7 @@ function uniformlyDistribute(mesh,ground,number=1,collisions=false,height=0,rand
 
         if(collisions) {
             obj.checkCollisions = true;
-        }
-        
+        }    
         
     }
 
@@ -120,6 +119,7 @@ function uniformlyDistribute(mesh,ground,number=1,collisions=false,height=0,rand
     return objects;
 }
 
+//bullet generator: compute angle and position for parallel and arc bullets
 function bulletGen(mesh,bulletCount=1,shooter=null,ground,
     mode="parallel",bulletAngleOffset=bulletAngleOffset,bulletHorizOffset=0.5,
     range=bulletRange, speed=bulletSpeed,scene) {
@@ -138,7 +138,7 @@ function bulletGen(mesh,bulletCount=1,shooter=null,ground,
     var bullet;
     for (var i=0;i<bulletCount;i++) {
         if( mode=="arc" && i==(Math.ceil(bulletCount/2)-1)) {
-            //don't shoot central bullet
+            //don't shoot central bullet for arc bullets
         }
         else {
             
@@ -159,7 +159,7 @@ function bulletGen(mesh,bulletCount=1,shooter=null,ground,
 }
 
 
-//rotate obj from A to B
+//rotate obj following direction from A to B
 function rotateTowards(obj,A,B){
     //var direction = B.getAbsolutePosition().subtract(A.getAbsolutePosition());
     var direction=B.subtract(A);
@@ -170,7 +170,7 @@ function rotateTowards(obj,A,B){
     obj.rotate(new BABYLON.Vector3(1, 0 ,0), Math.PI/2);
 }
 
-
+//generate all type of enemies
 function createEnemies(){   
     //CREATE ENEMIES
     //generate normal enemy
@@ -219,6 +219,7 @@ function createEnemies(){
     }
 }
 
+//after a level ended remove all remaining entities if any
 function clearGame() {
     while(enemies.length>0){
         enemies[0].enemy.dispose()
@@ -231,15 +232,14 @@ function clearGame() {
     }
     
     for(var k=0;k<scene.meshes.length;k++){
-        //console.log(scene.meshes[k])
-        name=scene.meshes[k].name
-        if(name.includes("bullet") ) {
+        if(scene.meshes[k].name && scene.meshes[k].name.includes("bullet") ) {
             scene.meshes[k].dispose()
-            console.log("found a bullet")
+            console.log("found a bullet to dispose")
         }
     }
 }
 
+//start a new game: reset stats and remove entities
 function newGame(){
     console.log("new game")
     actualLevel=0
@@ -266,7 +266,7 @@ function newGame(){
     clearGame()
 } 
 
-
+//end level screen and upgrades
 function endLevel() {
     console.log("endLevel called");
     upgradeButtons.forEach(button => {
@@ -286,6 +286,7 @@ function endLevel() {
     canvas.classList.add("anim-canvas");
 }   
 
+//start a new level
 function newLevel(){
     clearGame()
     increaseDifficulty(3)
@@ -294,6 +295,7 @@ function newLevel(){
     console.log("num of enemies in this level:",enemies.length,"---(normal,fast,tank)=",numNormalEnemies,numFastEnemies,numTankEnemies)
 }
 
+//add 3 new enemies and increase probability of new enemies
 function increaseDifficulty(newEnemies) {
     
     //add 3 enemies

@@ -2,6 +2,8 @@ const frameRate = 60;
 const speed = 5;
 
 /*
+
+//player components and relative indices
 0: lower body           /
 1: front left joint 1   Z
 2: upper body           Z
@@ -241,20 +243,18 @@ function emptyAnimArray() {
     animations.length = 0;
 }
 
-
+//cannon rotates and simulate recoil
 function cannonShoot() {
     
     var totalDuration=frameRate*(attackSpeed/1000)
     var cannon=playerAsset[3]
 
-    //in case of erro, position int he correct place
+    //in case of error, position cannon in the correct place
     cannon.position.y=0.1575
 
     var pos=cannon.position.y
     var rot=cannon.rotation.y
-    
-
-    
+     
     const cannonAnim = new BABYLON.Animation("cannonAnim", "rotation.y", 
     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
 
@@ -268,7 +268,6 @@ function cannonShoot() {
         frame: 0.5*totalDuration,
         value: rot+Math.PI/4
     });
-
 
     cannonAnim.setKeys(keyFrames);
     cannonAnim.enableBlending = true;
@@ -297,14 +296,13 @@ function cannonShoot() {
 }
 
 
-
+//spawn animation for enemies
 function spawningAnimation(position) {
     var material = new BABYLON.StandardMaterial("mat", scene);
     material.emissiveColor = new BABYLON.Color3(0.2, 0.6, 1);
     material.diffuseTexture = new BABYLON.Texture("texture/effect.png", scene);
     material.opacityTexture=new BABYLON.Texture("texture/blend.png", scene);
     material.opacityTexture.wAng = -Math.PI/2; 
-
     
     var cylinder = BABYLON.MeshBuilder.CreateCylinder("spawnAnimation",{height: 1}, scene);
     cylinder.position=position
@@ -330,8 +328,6 @@ function spawningAnimation(position) {
         ring1.rotation.y+=0.3  
         ring2.rotation.x-=0.2  
     })
-
-
 
 
     var frameRate=60
@@ -363,24 +359,4 @@ function spawningAnimation(position) {
     spawnAnim3.onAnimationEnd=function() { ring2.dispose(true,true); }
 
 
-}
-
-function fadeInAnimation(mesh,duration) {
-    var frameRate=60
-    var anim = new BABYLON.Animation("rising", "visibility",
-     frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-    var keyFrames = [];
-
-    keyFrames.push({
-        frame: 0,
-        value: 0
-    });
-
-    keyFrames.push({
-        frame: duration,
-        value: 1
-    });
-
-    anim.setKeys(keyFrames);
-    var spawnAnim=scene.beginDirectAnimation(mesh, [anim], 0,  duration, true);
 }

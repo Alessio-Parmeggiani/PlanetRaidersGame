@@ -9,7 +9,7 @@ class Enemy{
 
         //move toward target
         this.target=target
-        
+
         this.waitSpawningTime=new Date().getTime()+spawnDurationTime;
         //movement
         this.nextEnemyMoveTime=new Date().getTime();
@@ -19,7 +19,6 @@ class Enemy{
 
         //how much to move per frame
         this.velocity=Math.PI/200
-        //this.velocity=0
 
         //how much to wait before moving again, if 0 continue movement
         this.moveInterval=5 //ms
@@ -29,17 +28,15 @@ class Enemy{
 
         //distance traveled in this step
         this.distanceStepMoved=0
-
         this.direction=1
 
         // how many times it was hit by a bullet
         this.life = enemyLife;
-        
         this.healthBar = null;
+        this.dying=false
         
         this.enemyType=enemyType 
-
-        this.dying=false
+        
 
         this.DEBUG=DEBUG
 
@@ -48,31 +45,27 @@ class Enemy{
     spawn(position=new BABYLON.Vector3(0,0,0)){
         //time used for naming
         const currentTime = new Date().getTime();
-        
         spawningAnimation(position)
 
         this.enemy=this.mesh.createInstance("enemy")
         this.enemy.position=position;
         if(DEBUG) this.enemyPivot = BABYLON.Mesh.CreateCapsule(`enemyPivot`, { radiusTop: 0.05 }, scene);
         else this.enemyPivot=new BABYLON.TransformNode(`${currentTime}enemyPivot`)
-        //console.log(this.target)
+
         //rotate pivot towards player w.r.t enemy position
         var newTarget=getPointNearPosition(this.target.getAbsolutePosition(),0)
         rotateTowards(this.enemyPivot,this.enemy.getAbsolutePosition(),newTarget)
 
-        
         //orient enemy so that it's on surface along normal
         orientSurface(this.enemy,position,this.planet)
 
         this.enemy.setParent(this.enemyPivot)
         this.enemyPivot.setParent(this.planet)
 
-        //fadeInAnimation(this.enemy,180)
-
         if(position.x>0) this.direction=-1
-      
         this.enemy.checkCollisions = true;
 
+        //different stats for different types of enemy
         if(this.enemyType==enemyFastType) {
             this.velocity*=1.8
             this.moveInterval=500
@@ -85,12 +78,12 @@ class Enemy{
         }
 
         this.healthBar = new HealthBar(this.enemy, this.scene,this.life);
-        //this.enemy.showBoundingBox = true;
+        
     }
 
     moveStep(){
         //move of some distance and wait MoveInterval
-        //if moveInterval is set to 0, the movement is continous
+        //if moveInterval is set to 0 or almost 0, the movement is continous
         const currentTime = new Date().getTime();
         
         //compute how to rotate pivot
@@ -98,6 +91,7 @@ class Enemy{
         var direction = this.enemyPivot.getDirection(forward);
         direction.normalize();
 
+        //1 or -1
         var dir=this.direction
 
         //rotation while moving
@@ -106,41 +100,28 @@ class Enemy{
         if(currentTime>this.waitSpawningTime)
         {   
             
-            //var dir=1
             if (this.moveInterval<50 || (this.distanceStepMoved<this.maxdistanceMoved && currentTime>this.nextEnemyMoveTime)) {
-                //move of velocity
-                        
                 this.enemyPivot.rotate(direction,this.velocity*dir, BABYLON.Space.WORLD);
                 this.distanceStepMoved+=this.velocity
             }
             else if(this.distanceStepMoved>0){
                 //stop moving and wait
-                //console.log(dir)
                 this.nextEnemyMoveTime = new Date().getTime() + this.moveInterval;
                 this.distanceStepMoved=0    
             }
         }
-
     }
 
     updatePosition(){
-        //console.log("changing direction")
-        //every step it should update the direction
 
-        this.accuracy=0.2*remainingEnemies
-        if(this.enemyType==enemyFastType) {
-            this.accuracy=(this.accuracy)*2.5
-
-        }
-        if(this.enemyType==enemyTankType) {
-            this.accuracy=0.1
-            //this.nextUpdateTargetTime/=3
-        }
-
+        this.accuracy=0.5*remainingEnemies
+        if(this.enemyType==enemyFastType) this.accuracy=(this.accuracy)*2.5;
+        if(this.enemyType==enemyTankType) this.accuracy=0.1;
         //new target to choose every x seconds
         const currentTime = new Date().getTime();
+
+        //update target position
         if(currentTime>this.nextUpdateTargetTime) {
-            //console.log("changing direction")
             this.enemyPivot.setParent(null)
             this.enemy.setParent(null)
            
@@ -149,16 +130,16 @@ class Enemy{
             //new target
             var newTarget=getPointNearPosition(this.target.getAbsolutePosition(),this.accuracy)
             rotateTowards(this.enemyPivot,this.enemy.getAbsolutePosition(),newTarget)
-    
+            
+            //perform shortest path
             if(this.enemy.getAbsolutePosition().x>0) this.direction=-1
             else this.direction=1
-    
+
             this.enemy.setParent(this.enemyPivot)
             this.enemyPivot.setParent(this.planet)
             
             this.nextUpdateTargetTime = new Date().getTime() + this.updateTargetInterval;
         }
-
     }
 
     whenHit(damage) {
@@ -169,13 +150,12 @@ class Enemy{
     }
     
     clean() {
-        
         this.enemy.dispose()
         this.enemyPivot.dispose()
     }
 }
 
-//serve la classe proiettile?
+
 class Bullet{
     constructor(mesh,shooter=null,planet,scene){
         this.mesh=mesh
@@ -193,21 +173,16 @@ class Bullet{
         //stats
         this.bulletAngleOffset = pi/12;
         this.bulletHorizOffset = 0.5;
-
-        //this.bulletSpeed = Math.PI / 300;
         this.bulletSpeed=bulletSpeed
-        
         this.bulletHeight = 0.3;
-
         this.bulletRange = 1000;
-
         this.damage=1;
-
         this.bulletSize=0
 
         
     }
 
+    //get range value from number of revolutions needed
     getRangeFromNTurns(N) {
         var s=this.bulletSpeed
         var hi=this.bulletHeight
@@ -215,6 +190,8 @@ class Bullet{
         
         return range
     }
+
+    //thruster partciles for rockets
     createParticles() {
         
         var particles= new BABYLON.ParticleSystem("particles", 500);
@@ -245,6 +222,7 @@ class Bullet{
         if(emitRate<20) particles.emitRate = 20
         particles.emitRate =emitRate
         
+        //particles must start from base, not center
         particles.startPositionFunction = (worldMatrix, positionToUpdate, particle, isLocal) => {
             var randX = BABYLON.Scalar.RandomRange(minEmitBox.x, maxEmitBox.x);
             var randY = BABYLON.Scalar.RandomRange(minEmitBox.y, maxEmitBox.y);
@@ -260,9 +238,8 @@ class Bullet{
     spawn(dir){
         const currentTime = new Date().getTime();
     
-        //get width of bullet
         var mesh=this.mesh
-       
+        //get size of bullet
         this.bulletSize=mesh.getBoundingInfo().boundingBox.extendSize
         bulletHorizOffset = this.bulletSize.x;
     
@@ -273,11 +250,9 @@ class Bullet{
         //get instance from pre-loaded model
     
         this.bullet = mesh.createInstance("bullet ");
-        //this.bullet.scaling = new BABYLON.Vector3(0.15,0.15,0.15);
         var shooterPos = this.shooter.getAbsolutePosition();
         this.bullet.position = shooterPos;
-    
-        //this.bullet.rotation.y=90
+
         // dir is the direction of the cannon basically
         this.bullet.rotation.z = dir;
         this.pivot.rotation.z = dir;
@@ -340,11 +315,11 @@ class HealthBar {
 
     whenHit(damage) {
         this.remainingLife-=damage
+        //compute scaling of health bar w.r.t remaining health
         //remaining:full health = scaling : 1 (full bar)
         //scaling=remaining/full Health
-        //console.log(this.remainingLife/this.startLife)
-        this.mesh.scaling.y = this.remainingLife/this.startLife;
 
+        this.mesh.scaling.y = this.remainingLife/this.startLife;
 
         if (this.mesh.scaling.y>this.greenThreshold) 
             this.mesh.material.emissiveColor = new BABYLON.Color3(0, 0.8, 0);
@@ -354,10 +329,8 @@ class HealthBar {
         
         else if (this.mesh.scaling.y > this.redThreshold) 
             this.mesh.material.emissiveColor = new BABYLON.Color3(1, 0, 0);
-        
-        else if (this.mesh.scaling.y <= 0){
-            this.mesh.dispose(false, true);
-        }
 
+        else if (this.mesh.scaling.y <= 0) this.mesh.dispose(false, true);
+    
     }
 }
