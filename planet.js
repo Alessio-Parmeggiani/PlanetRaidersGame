@@ -29,11 +29,11 @@ var DEBUG = false;
 var actualLevel=0
 //player stats
 
-var attackSpeed = 300;
+var attackSpeed = 500;
 var rotationSpeed = Math.PI / 100;
 
 var godMode=false
-var maxPlayerLife = 100;
+var maxPlayerLife = 150;
 var playerLife = maxPlayerLife;
 var bonusLife = 0;
 var playerSpeed = 200;
@@ -89,7 +89,6 @@ var playerAsset=[];
 
 //assets needed later
 const assetsPath = [
-    "rocketTest.babylon",
     "rocket.babylon", 
     "enemy.babylon",
     "enemyFast.babylon",
@@ -145,7 +144,7 @@ buttons.forEach(button => {
         console.log(chosen_upgrade);
         switch (chosen_upgrade) {
             case "Player speed up":
-                playerSpeed /= 2;
+                playerSpeed /= 1.5;
                 icon.src = "icons/Speed up.png";    
                 break;
             case "Bullets +1":
@@ -157,8 +156,8 @@ buttons.forEach(button => {
                 icon.src = "icons/Arc bullets.png";
                 break;
             case "Bullets speed up":
-                bulletSpeed*=2;
-                attackSpeed-=50;
+                bulletSpeed*=1.5;
+                attackSpeed-=100;
                 icon.src = "icons/Bullets speed up.png";
                 break;
             case "Bullets range up":
@@ -184,6 +183,7 @@ buttons.forEach(button => {
                     if (event.target.id == "back") {
                         splash.remove();
                         newGame()
+                        updateHealthBar();
                         newLevel()
                     }
                 })
@@ -588,6 +588,7 @@ for(var idx = 0; idx < enemies.length; idx++) {
 
                 //check victory
                 if (actualLevel == 5) {
+                    godMode=true
                     endGame.classList.add("anim-game_over");
                     endGame.style.display = "block";
                 }

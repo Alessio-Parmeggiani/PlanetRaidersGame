@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@1,800" rel="stylesheet"> 
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400" rel="stylesheet"> 
+        <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet"> 
+        <link rel="stylesheet" href="victory.css">
+
+        <title>Planet Raiders </title>
+
+        <!-- Babylon.js -->
+        <script src="babylon/dat.gui.min.js"></script>
+        <script src="babylon/earcut.min.js"></script>
+        <script src="babylon/babylon.js"></script>
+        <script src="babylon/babylonjs.materials.min.js"></script>
+        <script src="babylon/babylonjs.loaders.js"></script>
+        <script src="babylon/babylonjs.serializers.min.js"></script>
+    </head>
+    <body>
+        <div class="splash" id="back">
+            <div class="title" id="img_container">
+                <img src="texture/render-planet-4.png" id="splash_planet">
+            </div>
+                <h1 id="title">PLANET RAIDERS</h1>
+            <div class="title" id="button_container">
+                <button id="button"><span>Play</span></button>
+            </div>    
+            <div class="title" id="keys_container">  
+                <div class="key" id="left">
+                    <img class="key_image" id="wasd" src="texture/wasd3.png">
+                    <span class="key_text">to move</span>
+                </div>
+                <div class="key" id="right">
+                    <img class="key_image" id="e" src="texture/e2.png">
+                    <span class="key_text">or</span>
+                    <img class="key_image" id="spacebar" src="texture/spacebar2.png">
+                    <span class="key_text">to shoot</span>
+                </div>
+            </div>      
+        </div>
+        <canvas id="renderCanvas"></canvas>
+        <div class="hidden" id="congrats">Congratulations!</div>
+        <div class="hidden" id="message">You beat all the enemies</div>
+        <div class="hidden" id="upgrade">Choose your upgrade</div>
+        <div class="hidden" id="container">
+            <button class="upgrade_button">
+                <img class="icon" src="icons/Speed up.png">
+                <span>Player speed up</span>
+            </button>
+            <button class="upgrade_button">
+                <img class="icon" src="icons/Bullets +1.png">
+                <span>Bullets +1</span>
+            </button>
+            <button class="upgrade_button">
+                <img class="icon" src="icons/Arc bullets.png">
+                <span>Arc bullets</span>
+            </button>
+            <button class="upgrade_button">
+                <img class="icon" src="icons/Bullets speed up.png">
+                <span>Bullets speed up</span>
+            </button>
+            <button class="upgrade_button">
+                <img class="icon" src="icons/Range up.png">
+                <span>Bullets range up</span>
+            </button>
+            <button id="health_button">
+                <img class="icon" src="icons/Health up.png">
+                <span>Health up</span>
+            </button>
+        </div>
+        <div id="health">
+            <span id="healthText">Health</span>
+            <div id="bar">
+                <img id="heart" src="icons/heart.png">
+                <div id="playerHealth"></div>
+            </div>
+        </div>
+        <div id="game_over_container">
+            <div id="game_over_title_container">
+                <div class="game_over" id="game">GAME</div>
+                <div class="game_over" id="eclipse_container">
+                    <img id="eclipse" src="texture/eclipse_512_bw.jpg"> 
+                </div>    
+                <div class="game_over" id="ver">VER</div>
+            </div>
+            <div id="sub_game_over">You couldn't save the planet</div>
+            <button id="try_again">
+                <span>Try again</span>
+            </button>
+        </div>
+        <div id="victory_container">
+            <div id="main_victory_container">
+                <img class="flex-item" id="victory_image" src="texture/victory.png">
+                <h1 id="title_victory">CONGRATULATIONS!</h1>
+                <h2 id="sub_victory">You saved the planet</h2>
+                <h3 id="credits">Credits:</h3>
+                <span id="names">Alessio Parmeggiani & Alessio Sfregola</span>
+            </div>
+            <div id="restart_container">
+                <button id="restart">
+                    <span>Play again</span>
+                </button>
+            </div>
+        </div>
+        <div id="upgradeList"></div>
+        <div id="fps">0</div>
+        <script src="functions.js" ></script>
+        <script src="actors.js" ></script>
+        <script src="animations.js"></script>
+        <script src="planet.js" ></script>
+    </body>
+</html>

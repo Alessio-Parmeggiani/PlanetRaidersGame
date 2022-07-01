@@ -67,9 +67,9 @@ class Enemy{
 
         //different stats for different types of enemy
         if(this.enemyType==enemyFastType) {
-            this.velocity*=1.8
-            this.moveInterval=500
-            this.life=enemyLife/3
+            this.velocity*=2
+            this.moveInterval=300
+            this.life=enemyLife/2
         }
         else if(this.enemyType==enemyTankType) {
             this.velocity*=0.3
