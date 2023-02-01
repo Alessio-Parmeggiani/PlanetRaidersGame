@@ -149,6 +149,16 @@ img.icon {
     margin-bottom: 1vh;
 }
 
+#mute_container {
+    bottom: 15px;
+    right: 30px;
+}
+
+#mute {
+    filter: brightness(0%) invert(100%);
+    height: 4vh;
+}
+
 button:hover img.icon{
     filter: brightness(0%);
 }

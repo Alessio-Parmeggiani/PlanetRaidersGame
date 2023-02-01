@@ -131,7 +131,6 @@ const splash = document.getElementById("back");
 const gameOver = document.getElementById("game_over_container");
 const eclipse = document.getElementById("eclipse_container");
 const endGame = document.getElementById("victory_container");
-//const canvas = document.getElementById("renderCanvas");
 var moreHealth;
 var chosen_upgrade;
 var newLevelSound;
@@ -288,6 +287,36 @@ var endLevelSound = new BABYLON.Sound("endLevelSound", "sounds/POL-digital-impac
 var enemyDead = new BABYLON.Sound("enemyDead", "sounds/POL-digital-impact-08.wav", scene);
 newLevelSound = new BABYLON.Sound("newLevelSound", "sounds/POL-digital-impact-02.wav", scene);
 
+//*************AUDIO BUTTON************** */
+const mute = document.getElementById("mute");
+let volumeUnlocked = false;
+
+if (BABYLON.Engine.audioEngine) {
+    BABYLON.Engine.audioEngine.useCustomUnlockedButton = true;
+}
+else {
+    console.log("No audio engine detected");
+}
+
+mute.onmousedown = function(e) {
+    e.preventDefault();
+    if (!volumeUnlocked) {
+        BABYLON.Engine.audioEngine.unlock();
+        volumeUnlocked = true;
+        mute.src = "icons/volume.png";
+        console.log("Volume activated");
+    }
+    else if (BABYLON.Engine.audioEngine.getGlobalVolume() == 0) {
+        BABYLON.Engine.audioEngine.setGlobalVolume(1);
+        mute.src = "icons/volume.png";
+        console.log("Volume activated");
+    }
+    else {
+        BABYLON.Engine.audioEngine.setGlobalVolume(0);
+        mute.src = "icons/mute.png";
+        console.log("Volume muted");
+    } 
+}
 
 //*************CREATE PLAYER************** */
 player=playerAsset[2]
