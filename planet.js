@@ -524,6 +524,26 @@ if ((inputMap[" "] || inputMap["e"]) && currentTime > nextBulletTime) {
 })
 //END OnBeforeRenderObservable i.e. input reading//
 
+// ******** PAUSE/UNPAUSE ********* //
+let paused = false;
+let pauseContainer = document.getElementById("pause_container");
+
+document.addEventListener("keydown", function(e) {
+    if (e.key == "Escape") {
+        if (!paused) {
+            engine.stopRenderLoop();
+            paused = true;
+            pauseContainer.style.display = "block";
+        } else {
+            engine.runRenderLoop(function() {
+                scene.render();
+            });
+            paused = false;
+            pauseContainer.style.display = "none";
+        }
+    }
+})
+
 
 /*************BULLETS LOOP: MOVEMENT AND COLLISION ***************** */
 scene.registerBeforeRender(function () {
