@@ -131,13 +131,15 @@ const splash = document.getElementById("back");
 const gameOver = document.getElementById("game_over_container");
 const eclipse = document.getElementById("eclipse_container");
 const endGame = document.getElementById("victory_container");
+//const canvas = document.getElementById("renderCanvas");
 var moreHealth;
 var chosen_upgrade;
 var newLevelSound;
 
 //actions related to buttons: upgrades-try again
 buttons.forEach(button => {
-    button.onclick = function() {
+    button.onmousedown = function(e) {
+        e.preventDefault();
         chosen_upgrade = button.getElementsByTagName("span")[0].textContent;
         const icon = document.createElement("img");
         icon.classList.add("icon");
@@ -178,6 +180,7 @@ buttons.forEach(button => {
                 }
                 break;
             case "Play":
+                canvas.focus();
                 splash.addEventListener("transitionend", (event) => {
                     // condition needed to ignore the play button transition
                     if (event.target.id == "back") {
