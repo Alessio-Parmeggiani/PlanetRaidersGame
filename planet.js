@@ -369,7 +369,7 @@ pbr.reflectivityTexture=roughnessTexture
 
 pbr.bumpTexture.level=2
 ground.material.maxSimultaneousLights=8
-ground.receiveShadows = true;
+ground.receiveShadows = false;
 
 //some debug utilities
 if (DEBUG) {
